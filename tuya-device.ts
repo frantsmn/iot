@@ -28,15 +28,15 @@ export default class TuyaDevice {
         this.#eventMap = {}
 
         this.#device.on('connected', () => {
+            console.log(`Устройство «${this.name}» подключено!`);
             this.#connected = true;
             this.#eventMap?.connect && this.#eventMap.connect();
-            console.log(`Устройство «${this.name}» подключено!`);
         });
 
         this.#device.on('disconnected', () => {
+            console.log(`Устройство «${this.name}» отключено!`);
             this.#connected = false;
             this.#eventMap?.disconnect && this.#eventMap.disconnect();
-            console.log(`Устройство «${this.name}» отключено!`);
         });
 
         this.#device.on('data', data => {
@@ -46,8 +46,8 @@ export default class TuyaDevice {
         });
 
         this.#device.on('error', async error => {
-            this.#eventMap.error && this.#eventMap.error(error);
             console.log(`Ошибка с устройством «${this.name}»: ${error}`);
+            this.#eventMap.error && this.#eventMap.error(error);
             await this.reconnect();
         });
 

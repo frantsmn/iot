@@ -6,7 +6,11 @@ class TuyaController {
 
     constructor(rawTuyaDevices: Array<any>) {
         this.devices = rawTuyaDevices.map((rawDevice) => new TuyaDevice(rawDevice))
-        this.devices.forEach(device => device.connect());
+        this.devices.forEach(async device => {
+                await device.connect();
+                await device.on('disconnect', () => device.reconnect());
+            }
+        );
     }
 
     status(deviceName) {
