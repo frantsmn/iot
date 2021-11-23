@@ -67,8 +67,10 @@ export default class TuyaDevice {
     }
 
     async reconnect(): Promise<void> {
-        console.log(`Отключение от устройства «${this.name}»...`);
-        await this.disconnect();
+        if (this.#connected) {
+            console.log(`Отключение от устройства «${this.name}»...`);
+            await this.disconnect();
+        }
         console.log(`Подключение к устройству «${this.name}» через 5 секунд...`);
         setTimeout(() => this.connect(), 5000);
     }
