@@ -50,20 +50,16 @@ export default class TuyaDevice {
             this.#eventMap.error && this.#eventMap.error(error);
             await this.reconnect();
         });
-
     }
 
     async connect(): Promise<void> {
-        try {
-            await this.#device.find();
-            await this.#device.connect();
-        } catch {
-            await this.reconnect();
-        }
+        await this.#device.find();
+        await this.#device.connect();
     }
 
     async disconnect(): Promise<void> {
-        if (this.#connected) return await this.#device.disconnect();
+        if (this.#connected) return await this.#device.disconnect()
+        else console.log(`Устройство «${this.name}» уже отключено`)
     }
 
     async reconnect(): Promise<void> {
@@ -71,7 +67,7 @@ export default class TuyaDevice {
             console.log(`Отключение от устройства «${this.name}»...`);
             await this.disconnect();
         }
-        console.log(`Подключение к устройству «${this.name}» через 5 секунд...`);
+        console.log(`Переподключение к устройству «${this.name}» через 5 секунд...`);
         setTimeout(() => this.connect(), 5000);
     }
 
