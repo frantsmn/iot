@@ -7,8 +7,10 @@ class TuyaController {
     constructor(rawTuyaDevices: Array<any>) {
         this.devices = rawTuyaDevices.map((rawDevice) => new TuyaDevice(rawDevice))
         this.devices.forEach(async device => {
-                await device.connect();
+                const connectResult = await device.connect();
+                if (!connectResult) await device.reconnect();
                 await device.on('disconnect', () => device.reconnect());
+                await device.on('error', () => device.reconnect());
             }
         );
     }

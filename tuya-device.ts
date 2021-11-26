@@ -14,12 +14,13 @@ interface TuyaDeviceEventMap {
 }
 
 export default class TuyaDevice {
-    readonly id: any;
-    readonly name: any;
-    #device: any;
-    #status: boolean;
-    #connected: boolean;
-    readonly #eventMap: TuyaDeviceEventMap;
+    readonly id: any;                           // Уникальный идентификатор устройства
+    readonly name: any;                         // Наименование устройства
+    #device: any;                               // TuyAPI объект устройства
+    #status: boolean;                           // Статус устройства (вкл/выкл)
+    #connected: boolean;                        // Состояние подключения устройства (подкл/откл)
+    #reconnection: boolean;                     // Флаг текущего процесса переподключения устройства
+    readonly #eventMap: TuyaDeviceEventMap;     // Карта методов (коллбэков) на события устройства
 
     constructor({id, key, name}: RawTuyaDevice) {
         this.id = id
@@ -28,13 +29,13 @@ export default class TuyaDevice {
         this.#eventMap = {}
 
         this.#device.on('connected', () => {
-            console.log(`Устройство «${this.name}» подключено!`);
+            console.log(`➕ Устройство «${this.name}» подключено!`);
             this.#connected = true;
             this.#eventMap?.connect && this.#eventMap.connect();
         });
 
         this.#device.on('disconnected', () => {
-            console.log(`Устройство «${this.name}» отключено!`);
+            console.log(`❌ Устройство «${this.name}» отключено!`);
             this.#connected = false;
             this.#eventMap?.disconnect && this.#eventMap.disconnect();
         });
@@ -48,27 +49,70 @@ export default class TuyaDevice {
         this.#device.on('error', async error => {
             console.log(`Ошибка с устройством «${this.name}»: ${error}`);
             this.#eventMap.error && this.#eventMap.error(error);
-            await this.reconnect();
         });
     }
 
-    async connect(): Promise<void> {
-        await this.#device.find();
-        await this.#device.connect();
+    async connect(): Promise<boolean> {
+        if (this.#connected) {
+            console.log(`[tuya-device.ts] connect()\nУстройство «${this.name}» уже подключено`);
+            return true;
+        }
+        try {
+            await this.#device.find();
+            await this.#device.connect();
+            return true;
+        } catch (error) {
+            console.error(
+                `[tuya-device.ts] connect()\nОшибка при подключении устройства «${this.name}»\n`,
+                error
+            );
+            return false;
+        }
     }
 
-    async disconnect(): Promise<void> {
-        if (this.#connected) return await this.#device.disconnect()
-        else console.log(`Устройство «${this.name}» уже отключено`)
+    async disconnect(): Promise<boolean> {
+        if (!this.#connected) {
+            console.log(`[tuya-device.ts] disconnect()\nУстройство «${this.name}» уже отключено`);
+            return true;
+        }
+        try {
+            await this.#device.disconnect();
+            return true;
+        } catch (error) {
+            console.error(
+                `[tuya-device.ts] disconnect()\nОшибка при отключении устройства «${this.name}»\n`,
+                error
+            );
+            return false;
+        }
     }
 
     async reconnect(): Promise<void> {
-        if (this.#connected) {
-            console.log(`Отключение от устройства «${this.name}»...`);
-            await this.disconnect();
+        if (this.#reconnection) return console.log(`[tuya-device.ts] > reconnect | Переподключение к устройству «${this.name}» уже запущено. Повтороное переподключение отменено!`);
+        this.#reconnection = true;
+        console.log(`[tuya-device.ts] > reconnect | Переподключение к устройству «${this.name}»`);
+
+        // if (this.#connected) {
+        //     console.log(`[tuya-device.ts] > reconnect | Отключение от устройства «${this.name}»...`);
+        //     await this.disconnect();
+        // }
+
+        let attemptCounter = 1;
+        let timeoutSec = 5;
+        const reconnectAttempt = () => {
+            console.log(`[tuya-device.ts] > reconnect | Попытка подключения #${attemptCounter++} к устройству «${this.name}» через ${timeoutSec} сек...`);
+            setTimeout(async () => {
+                const result = await this.connect();
+                if (result) {
+                    this.#reconnection = false;
+                    return console.log(`[tuya-device.ts] > reconnect | Устройство «${this.name}» переподключено!`);
+                } else {
+                    timeoutSec += Boolean(attemptCounter % 5) ? 0 : 5;
+                    reconnectAttempt();
+                }
+            }, timeoutSec * 1000);
         }
-        console.log(`Переподключение к устройству «${this.name}» через 5 секунд...`);
-        setTimeout(() => this.connect(), 5000);
+        reconnectAttempt();
     }
 
     async toggle(): Promise<void> {
