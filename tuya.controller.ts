@@ -1,6 +1,9 @@
 import TuyaDevice from "./tuya-device"
 import path from 'path'
 
+type DeviceActionTypes = 'turnOn' | 'turnOff' | 'toggle' | string;
+type DeviceNames = 'all' | string;
+
 class TuyaController {
     devices: Array<TuyaDevice>;
 
@@ -15,20 +18,35 @@ class TuyaController {
         );
     }
 
-    status(deviceName) {
-        const device = this.devices.find(({name}) => name === deviceName);
-        if (device) {
+    status(deviceName: string) {
+        if (deviceName === 'all') {
+            const response = {};
+            for (const {name, connected, status} of this.devices) {
+                response[name] = {connected, status};
+            }
+            return response;
+        } else {
+            const device = this.devices.find(({name}) => name === deviceName);
+            if (!device) return;
             const {connected, status} = device;
             return {connected, status};
         }
     }
 
-    async action(deviceName, actionType) {
-        const device = this.devices.find(({name}) => name === deviceName);
-        if (actionType
-            && device
-            && actionType in device) {
-            await device[actionType]();
+    async action(deviceName: DeviceNames, actionType: DeviceActionTypes) {
+        if (deviceName === 'all') {
+            for await (const device of this.devices) {
+                if (actionType in device) {
+                    await device[actionType]();
+                }
+            }
+        } else {
+            const device = this.devices.find(({name}) => name === deviceName);
+            if (actionType
+                && device
+                && actionType in device) {
+                await device[actionType]();
+            }
         }
     }
 }
