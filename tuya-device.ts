@@ -47,8 +47,9 @@ export default class TuyaDevice {
 
             console.log(
                 `[${(new Date).toLocaleTimeString('ru')}] `,
+                this.#status ? '⚫ ' : '⚪ ',
                 `«${this.name}» `,
-                this.#status ? '⚫ включено' : '⚪ выключено'
+                this.#status ? 'включено' : 'выключено'
             );
         });
 
