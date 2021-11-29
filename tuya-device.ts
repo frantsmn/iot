@@ -44,6 +44,12 @@ export default class TuyaDevice {
             if (!data.dps || this.#status === data.dps['1']) return;
             this.#status = data.dps['1'];
             this.#eventMap.data && this.#eventMap.data({status: this.#status});
+
+            console.log(
+                `[${(new Date).toLocaleTimeString('ru')}] `,
+                `«${this.name}» `,
+                this.#status ? '⚫ включено' : '⚪ выключено'
+            );
         });
 
         this.#device.on('error', async error => {
