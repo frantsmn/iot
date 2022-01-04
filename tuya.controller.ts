@@ -1,7 +1,7 @@
 import TuyaDevice from "./tuya-device"
 import path from 'path'
 
-type DeviceActionTypes = 'turnOn' | 'turnOff' | 'toggle' | string;
+type DeviceActionTypes = 'on' | 'off' | 'toggle' | string;
 type DeviceNames = 'all' | string;
 
 class TuyaController {
@@ -12,12 +12,16 @@ class TuyaController {
         this.devices.forEach(async device => {
                 const connectResult = await device.connect();
                 if (!connectResult) await device.reconnect();
-                await device.on('disconnect', () => device.reconnect());
-                await device.on('error', () => device.reconnect());
+                await device.onEvent('disconnect', () => device.reconnect());
+                await device.onEvent('error', () => device.reconnect());
             }
         );
     }
 
+    /**
+     * Получить статус
+     * @param deviceName имя устройства
+     */
     status(deviceName: string) {
         if (deviceName === 'all') {
             const response = {};
@@ -33,7 +37,15 @@ class TuyaController {
         }
     }
 
-    async action(deviceName: DeviceNames, actionType: DeviceActionTypes) {
+    /**
+     * Выполнить действие
+     * @param deviceName имя устройства
+     * @param actionType тип действия
+     */
+    async action(
+        deviceName: DeviceNames,
+        actionType: DeviceActionTypes
+    ): Promise<void> {
         if (deviceName === 'all') {
             for await (const device of this.devices) {
                 if (actionType in device) {
@@ -42,9 +54,7 @@ class TuyaController {
             }
         } else {
             const device = this.devices.find(({name}) => name === deviceName);
-            if (actionType
-                && device
-                && actionType in device) {
+            if (device && actionType in device) {
                 await device[actionType]();
             }
         }

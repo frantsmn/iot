@@ -99,11 +99,6 @@ export default class TuyaDevice {
         this.#reconnection = true;
         console.log(`[tuya-device.ts] > reconnect | Переподключение к устройству «${this.name}»`);
 
-        // if (this.#connected) {
-        //     console.log(`[tuya-device.ts] > reconnect | Отключение от устройства «${this.name}»...`);
-        //     await this.disconnect();
-        // }
-
         let attemptCounter = 1;
         let timeoutSec = 5;
         const reconnectAttempt = () => {
@@ -126,11 +121,11 @@ export default class TuyaDevice {
         if (this.#connected) await this.#device.toggle(1);
     }
 
-    async turnOn(): Promise<void> {
+    async on(): Promise<void> {
         if (this.#connected) await this.#device.set({set: true});
     }
 
-    async turnOff(): Promise<void> {
+    async off(): Promise<void> {
         if (this.#connected) await this.#device.set({set: false});
     }
 
@@ -139,7 +134,7 @@ export default class TuyaDevice {
      * @param eventName
      * @param callback
      */
-    on(eventName: 'connect' | 'disconnect' | 'data' | 'error', callback: () => any) {
+    onEvent(eventName: 'connect' | 'disconnect' | 'data' | 'error', callback: () => any) {
         this.#eventMap[eventName] = callback;
     }
 
