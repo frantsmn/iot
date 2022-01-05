@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies & build
         uses: garygrossgarten/github-action-ssh@release
         with:
-          command: cd ~/dev/iot-service && git pull && npm i
+          command: cd ~/dev/iot-service && git reset --hard HEAD && git pull && npm i
           host: ${{ secrets.HOST }}
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
