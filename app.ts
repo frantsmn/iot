@@ -1,8 +1,10 @@
 import express from 'express'
-import auth from './auth'
-import router from './router'
-import error from './error'
+import auth from './router/auth'
+import router from './router/router'
+import error from './router/error'
+
 import Scheduler from './scheduler';
+import './user-device-scan';
 
 const app = express();
 const port = 3001;

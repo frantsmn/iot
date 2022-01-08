@@ -1,5 +1,5 @@
 import express from 'express'
-import tuyaController from './tuya.controller'
+import tuyaController from '../tuya.controller'
 
 const router = express.Router();
 

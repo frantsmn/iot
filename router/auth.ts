@@ -1,4 +1,4 @@
-import users from './user';
+import users from '../user';
 
 export default function auth(req, res, next) {
     // check for basic auth header

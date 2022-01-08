@@ -16,6 +16,7 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
+    "arpscan": "^1.0.2",
     "express": "^4.17.1",
     "node-schedule": "^2.1.0",
     "tuyapi": "^7.2.0"

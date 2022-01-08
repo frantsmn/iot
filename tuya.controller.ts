@@ -1,4 +1,4 @@
-import TuyaDevice from "./tuya-device"
+import TuyaDevice from "./model/tuya-device"
 import path from 'path'
 
 type DeviceActionTypes = 'on' | 'off' | 'toggle' | string;
