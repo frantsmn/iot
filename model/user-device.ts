@@ -38,13 +38,13 @@ export default class UserDevice {
                     console.log(`Актуальность истекла`);
                 }
             }
-        }, 10000);
+        }, 15000);
 
-        setInterval(() => {
-            console.log('== User device ==');
-            console.log(this);
-            console.log('isActual: ', this.isActual);
-        }, 60000);
+        // setInterval(() => {
+        //     console.log('== User device ==');
+        //     console.log(this);
+        //     console.log('isActual: ', this.isActual);
+        // }, 60000);
     }
 
     /**

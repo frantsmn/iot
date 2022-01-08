@@ -75,8 +75,8 @@ const userDeviceScan = new UserDevicesScan(USER_DEVICES_PATH);
 
 setInterval(() => {
     const res = userDeviceScan.scanAll();
-    res.then((r) => {
-        console.log('-- Device scan result --');
-        console.log(r);
-    });
+    // res.then((r) => {
+    //     console.log('-- Device scan result --');
+    //     console.log(r);
+    // });
 }, 10000)
