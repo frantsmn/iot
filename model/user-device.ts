@@ -25,8 +25,26 @@ export default class UserDevice {
         this.lastCheck = null;
         this.lastSuccessfulCheck = null;
         this.#isActual = false;
-        this.actualityTime = 30000;
+        this.actualityTime = 180000; //3 min
         this.#timeoutId = null;
+
+        setInterval(() => {
+            const endTime = this.lastSuccessfulCheck + this.actualityTime;
+            const timeLeft = Date.now() - endTime;
+            if (this.lastSuccessfulCheck) {
+                if (timeLeft > 0) {
+                    console.log(`Актуальность истекает через ${timeLeft}ms (${timeLeft / 1000}sec)`);
+                } else {
+                    console.log(`Актуальность истекла`);
+                }
+            }
+        }, 10000);
+
+        setInterval(() => {
+            console.log('== User device ==');
+            console.log(this);
+            console.log('== User device ==');
+        }, 60000);
     }
 
     /**
