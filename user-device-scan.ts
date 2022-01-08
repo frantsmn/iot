@@ -49,6 +49,9 @@ class UserDevicesScan {
                     result.isError = true;
                     result.errorMsg = `Ошибка при поиске устройства «${device.name}». ${error}`;
                     reject(result);
+                } else {
+                    result.isError = false;
+                    result.errorMsg = ``;
                 }
 
                 // console.log(data, '---', name, macWifi);
@@ -76,4 +79,4 @@ setInterval(() => {
         console.log('-- Device scan result --');
         console.log(r);
     });
-}, 15000)
+}, 10000)

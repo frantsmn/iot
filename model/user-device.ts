@@ -30,7 +30,7 @@ export default class UserDevice {
 
         setInterval(() => {
             const endTime = this.lastSuccessfulCheck + this.actualityTime;
-            const timeLeft = Date.now() - endTime;
+            const timeLeft = endTime - Date.now();
             if (this.lastSuccessfulCheck) {
                 if (timeLeft > 0) {
                     console.log(`Актуальность истекает через ${timeLeft}ms (${timeLeft / 1000}sec)`);
@@ -43,6 +43,7 @@ export default class UserDevice {
         setInterval(() => {
             console.log('== User device ==');
             console.log(this);
+            console.log('isActual: ', this.isActual);
         }, 60000);
     }
 
