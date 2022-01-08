@@ -16,7 +16,7 @@ interface UserDeviceResult {
     errorMsg: string
 }
 
-const USER_DEVICES_PATH = path.resolve(require('os').homedir(), 'user-devices.json')
+const USER_DEVICES_PATH = path.resolve(require('os').homedir(), '.iot/user-devices.json')
 
 class UserDevicesScan {
     devices: Array<UserDevice>;
