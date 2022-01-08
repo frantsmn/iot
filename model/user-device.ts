@@ -43,7 +43,6 @@ export default class UserDevice {
         setInterval(() => {
             console.log('== User device ==');
             console.log(this);
-            console.log('== User device ==');
         }, 60000);
     }
 

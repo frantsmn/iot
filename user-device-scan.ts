@@ -11,7 +11,7 @@ interface RawUserDevice {
 interface UserDeviceResult {
     name: string
     isWifiConnected: boolean
-    isBluetoothConnected: boolean
+    isBluetoothConnected?: boolean
     isError: boolean
     errorMsg: string
 }
@@ -40,7 +40,7 @@ class UserDevicesScan {
                 const result: UserDeviceResult = {
                     name: device.name,
                     isWifiConnected: false,
-                    isBluetoothConnected: false,
+                    // isBluetoothConnected: false,
                     isError: true,
                     errorMsg: `Ошибка при поиске устройства «${device.name}». ${error}`,
                 }
@@ -75,6 +75,5 @@ setInterval(() => {
     res.then((r) => {
         console.log('-- Device scan result --');
         console.log(r);
-        console.log('-- Device scan result --');
     });
-}, 60000)
+}, 15000)
