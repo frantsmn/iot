@@ -1,12 +1,5 @@
-import path from 'path'
 import arpScanner from 'arpscan'
-import UserDevice from './model/user-device'
-
-interface RawUserDevice {
-    name: string
-    mac_wifi: string
-    mac_bluetooth?: string
-}
+import UserDevice from '../model/user-device'
 
 interface UserDeviceResult {
     name: string
@@ -16,13 +9,11 @@ interface UserDeviceResult {
     errorMsg: string
 }
 
-const USER_DEVICES_PATH = path.resolve(require('os').homedir(), '.iot/user-devices.json')
-
-class UserDevicesScan {
+export default class UserDevicesController {
     devices: Array<UserDevice>;
 
-    constructor(path) {
-        this.devices = Array.from(require(path)).map((rawDevice: RawUserDevice) => new UserDevice(rawDevice))
+    constructor(userDevices: Array<UserDevice>) {
+        this.devices = userDevices;
     }
 
     private scanDevice(device: UserDevice): Promise<UserDeviceResult> {
@@ -69,14 +60,8 @@ class UserDevicesScan {
         const devicePromises = this.devices.map((device) => this.scanDevice(device));
         return await Promise.all(devicePromises);
     }
+
+    isAnyDeviceActualNow() {
+        return Boolean(this.devices.find(device => device.isActual));
+    }
 }
-
-const userDeviceScan = new UserDevicesScan(USER_DEVICES_PATH);
-
-setInterval(() => {
-    const res = userDeviceScan.scanAll();
-    // res.then((r) => {
-    //     console.log('-- Device scan result --');
-    //     console.log(r);
-    // });
-}, 10000)

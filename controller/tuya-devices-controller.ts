@@ -1,14 +1,13 @@
-import TuyaDevice from "./model/tuya-device"
-import path from 'path'
+import TuyaDevice from "../model/tuya-device"
 
 type DeviceActionTypes = 'on' | 'off' | 'toggle' | string;
 type DeviceNames = 'all' | string;
 
-class TuyaController {
+export default class TuyaDevicesController {
     devices: Array<TuyaDevice>;
 
-    constructor(rawTuyaDevices: Array<any>) {
-        this.devices = rawTuyaDevices.map((rawDevice) => new TuyaDevice(rawDevice))
+    constructor(tuyaDevices: Array<TuyaDevice>) {
+        this.devices = tuyaDevices;
         this.devices.forEach(async device => {
                 const connectResult = await device.connect();
                 if (!connectResult) await device.reconnect();
@@ -60,6 +59,3 @@ class TuyaController {
         }
     }
 }
-
-const TUYA_DEVICES_PATH = path.resolve(require('os').homedir(), '.iot/tuya-devices.json');
-export default new TuyaController(Array.from(require(TUYA_DEVICES_PATH)));

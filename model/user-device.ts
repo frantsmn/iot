@@ -25,7 +25,7 @@ export default class UserDevice {
         this.lastCheck = null;
         this.lastSuccessfulCheck = null;
         this.#isActual = false;
-        this.actualityTime = 180000; //3 min
+        this.actualityTime = 300000; //5 min
         this.#timeoutId = null;
 
         setInterval(() => {
@@ -33,18 +33,12 @@ export default class UserDevice {
             const timeLeft = endTime - Date.now();
             if (this.lastSuccessfulCheck) {
                 if (timeLeft > 0) {
-                    console.log(`Актуальность истекает через ${timeLeft}ms (${timeLeft / 1000}sec)`);
+                    console.log(`Актуально ${timeLeft}ms (${timeLeft / 1000} sec) или (${timeLeft / 1000 / 60} min)`);
                 } else {
-                    console.log(`Актуальность истекла`);
+                    console.log(`Не актуально`);
                 }
             }
         }, 15000);
-
-        // setInterval(() => {
-        //     console.log('== User device ==');
-        //     console.log(this);
-        //     console.log('isActual: ', this.isActual);
-        // }, 60000);
     }
 
     /**
