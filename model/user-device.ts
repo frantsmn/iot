@@ -2,6 +2,7 @@ interface RawUserDevice {
     name: string
     mac_wifi: string
     mac_bluetooth?: string
+    ip: string
 }
 
 interface DeviceState {
@@ -11,6 +12,7 @@ interface DeviceState {
 
 export default class UserDevice {
     readonly name: string
+    readonly ip: string
     readonly macWifi: string
     readonly macBluetooth?: string
     lastCheck: number

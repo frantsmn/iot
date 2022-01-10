@@ -7,10 +7,6 @@ export default class UserDeviceSchedule {
         schedule.scheduleJob(
             '0/15 * * * * *',
             () => userDeviceController.scanAll()
-                .then((r) => {
-                    // console.log('-- Device scan result --');
-                    // console.log(r);
-                })
                 .catch((error) => {
                     console.log('Ошибка при попытке поиска устройства пользователя');
                     console.error(error);
