@@ -24,6 +24,7 @@ export default class UserDevice {
     constructor(device: RawUserDevice) {
         this.name = device.name;
         this.macWifi = device.mac_wifi;
+        this.ip = device.ip;
         this.lastCheck = null;
         this.lastSuccessfulCheck = null;
         this.#isActual = false;
