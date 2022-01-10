@@ -32,8 +32,12 @@ export default class UserDevice {
             const endTime = this.lastSuccessfulCheck + this.actualityTime;
             const timeLeft = endTime - Date.now();
             if (this.lastSuccessfulCheck) {
-                if (timeLeft > 0) {
-                    console.log(`Актуально ${(timeLeft / 1000 / 60).toFixed(0)} min ${(timeLeft / 1000 % 60).toFixed(0)} sec`);
+                const mins: number = parseInt(String(timeLeft / 1000 / 60)) - 1;
+                const secs: number = Number((timeLeft / 1000 % 60).toFixed(0));
+                const minsStr = mins > 0 ? `${mins} min` : '';
+                const secStr = secs > 0 ? `${secs} sec` : '';
+                if (mins || secs) {
+                    console.log(`Актуально ${minsStr} ${secStr}`);
                 } else {
                     console.log(`Не актуально`);
                 }
