@@ -33,7 +33,7 @@ export default class UserDevice {
             const timeLeft = endTime - Date.now();
             if (this.lastSuccessfulCheck) {
                 if (timeLeft > 0) {
-                    console.log(`Актуально ${timeLeft}ms (${(timeLeft / 1000).toFixed(1)} sec) или (${(timeLeft / 1000 / 60).toFixed(1)} min)`);
+                    console.log(`Актуально ${(timeLeft / 1000 / 60).toFixed(0)} min (${(timeLeft / 1000 % 60).toFixed(0)} sec)`);
                 } else {
                     console.log(`Не актуально`);
                 }
