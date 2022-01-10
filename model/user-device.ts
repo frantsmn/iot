@@ -32,10 +32,10 @@ export default class UserDevice {
             const endTime = this.lastSuccessfulCheck + this.actualityTime;
             const timeLeft = endTime - Date.now();
             if (this.lastSuccessfulCheck) {
-                const mins: number = parseInt(String(timeLeft / 1000 / 60)) - 1;
-                const secs: number = Number((timeLeft / 1000 % 60).toFixed(0));
-                const minsStr = mins > 0 ? `${mins} min` : '';
-                const secStr = secs > 0 ? `${secs} sec` : '';
+                const mins: number = parseInt(String(timeLeft / 1000 / 60));
+                const secs: number = parseInt(String(timeLeft / 1000 % 60));
+                const minsStr = mins > 0 ? `${mins} min` : '0 min';
+                const secStr = secs > 0 ? `${secs} sec` : '0 sec';
                 if (mins || secs) {
                     console.log(`Актуально ${minsStr} ${secStr}`);
                 } else {
