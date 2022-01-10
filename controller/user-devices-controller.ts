@@ -24,7 +24,7 @@ export default class UserDevicesController {
             mac: '...'
           }
         */
-        if (result && result.mac === device.macWifi) {
+        if (result && result.mac.toUpperCase() === device.macWifi) {
             device.setState({timestamp: Date.now(), status: true});
         }
     }
