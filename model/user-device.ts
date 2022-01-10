@@ -39,10 +39,8 @@ export default class UserDevice {
                 const secs: number = parseInt(String(timeLeft / 1000 % 60));
                 const minsStr = mins > 0 ? `${mins} min` : '0 min';
                 const secStr = secs > 0 ? `${secs} sec` : '0 sec';
-                if (mins || secs) {
-                    console.log(`${(new Date).toLocaleTimeString('ru-RU')} [${minsStr} ${secStr}]`);
-                } else {
-                    console.log(`${(new Date).toLocaleTimeString('ru-RU')} [Не актуально]`);
+                if (mins > 0 || secs > 0) {
+                    console.log(`[${(new Date).toLocaleTimeString('ru-RU')}] ${minsStr} ${secStr}`);
                 }
             }
         }, 30_000);
@@ -75,7 +73,7 @@ export default class UserDevice {
 
     set isActual(state: boolean) {
         if (this.#isActual !== undefined && this.#isActual != state) {
-            console.log(`Устройство ${this.name} ${state ? 'снова актуально' : 'больше не актуально'}`);
+            console.log(`Устройство "${this.name}" ${state ? 'актуально' : 'больше не актуально'}`);
         }
 
         this.#isActual = state;
