@@ -31,19 +31,19 @@ export default class UserDevice {
         this.actualityTime = 120_000; //2 min
         this.#timeoutId = null;
 
-        setInterval(() => {
-            const endTime = this.lastSuccessfulCheck + this.actualityTime;
-            const timeLeft = endTime - Date.now();
-            if (this.lastSuccessfulCheck) {
-                const mins: number = parseInt(String(timeLeft / 1000 / 60));
-                const secs: number = parseInt(String(timeLeft / 1000 % 60));
-                const minsStr = mins > 0 ? `${mins} min` : '0 min';
-                const secStr = secs > 0 ? `${secs} sec` : '0 sec';
-                if (mins > 0 || secs > 0) {
-                    console.log(`[${(new Date).toLocaleTimeString('ru-RU')}] ${minsStr} ${secStr}`);
-                }
-            }
-        }, 30_000);
+        // setInterval(() => {
+        //     const endTime = this.lastSuccessfulCheck + this.actualityTime;
+        //     const timeLeft = endTime - Date.now();
+        //     if (this.lastSuccessfulCheck) {
+        //         const mins: number = parseInt(String(timeLeft / 1000 / 60));
+        //         const secs: number = parseInt(String(timeLeft / 1000 % 60));
+        //         const minsStr = mins > 0 ? `${mins} min` : '0 min';
+        //         const secStr = secs > 0 ? `${secs} sec` : '0 sec';
+        //         if (mins > 0 || secs > 0) {
+        //             console.log(`[${(new Date).toLocaleTimeString('ru-RU')}] ${minsStr} ${secStr}`);
+        //         }
+        //     }
+        // }, 30_000);
     }
 
     /**
@@ -73,7 +73,7 @@ export default class UserDevice {
 
     set isActual(state: boolean) {
         if (this.#isActual !== undefined && this.#isActual != state) {
-            console.log(`Устройство "${this.name}" ${state ? 'актуально' : 'больше не актуально'}`);
+            console.log(`[${(new Date).toLocaleTimeString('ru-RU')}] Устройство "${this.name}" ${state ? 'актуально' : 'больше не актуально'}`);
         }
 
         this.#isActual = state;
