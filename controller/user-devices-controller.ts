@@ -1,4 +1,3 @@
-import arpScanner from 'arpscan'
 import find from 'local-devices'
 import UserDevice from '../model/user-device'
 
@@ -9,41 +8,28 @@ export default class UserDevicesController {
         this.devices = userDevices;
     }
 
-    private async scanDevice(device: UserDevice): Promise<Boolean> {
-
+    async scanDevice(device: UserDevice) {
         if (process.platform !== "linux") {
             console.log('Not a linux environment!')
-            return Promise.resolve(null);
         }
 
-        // arpScanner(onResult, {command: 'arp-scan', args: ['-l'], sudo: true});
-
         // Find a single device by ip address.
-        const result = await find(device.ip);
-        console.log('scan result: ',result)
-        onResult(result);
-        // .then(device => {
-        //     console.log(device)
-        //     /*
-        //       {
-        //         name: '?',
-        //         ip: '192.168.0.10',
-        //         mac: '...'
-        //       }
-        //     */
-        // })
-
-        function onResult(data) {
-            if (data) {
-                device.setState({timestamp: Date.now(), status: true});
-                return true;
-            }
-
-            return false;
+        const result: any = await find(device.ip);
+        /*
+        todo: replace "any" by interface
+        result:
+          {
+            name: '?',
+            ip: '192.168.10.10',
+            mac: '...'
+          }
+        */
+        if (result && result.mac === device.macWifi) {
+            device.setState({timestamp: Date.now(), status: true});
         }
     }
 
-    async scanAll(): Promise<Array<Boolean>> {
+    async scanAll() {
         const devicePromises = this.devices.map((device) => this.scanDevice(device));
         return await Promise.all(devicePromises);
     }

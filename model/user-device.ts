@@ -28,7 +28,7 @@ export default class UserDevice {
         this.lastCheck = null;
         this.lastSuccessfulCheck = null;
         this.#isActual = false;
-        this.actualityTime = 300000; //5 min
+        this.actualityTime = 120_000; //2 min
         this.#timeoutId = null;
 
         setInterval(() => {
@@ -40,12 +40,12 @@ export default class UserDevice {
                 const minsStr = mins > 0 ? `${mins} min` : '0 min';
                 const secStr = secs > 0 ? `${secs} sec` : '0 sec';
                 if (mins || secs) {
-                    console.log(`Актуально ${minsStr} ${secStr}`);
+                    console.log(`${(new Date).toLocaleTimeString('ru-RU')} [${minsStr} ${secStr}]`);
                 } else {
-                    console.log(`Не актуально`);
+                    console.log(`${(new Date).toLocaleTimeString('ru-RU')} [Не актуально]`);
                 }
             }
-        }, 15000);
+        }, 30_000);
     }
 
     /**
