@@ -4,7 +4,7 @@ import {userDeviceController} from "../controller";
 
 export default class LightSchedule {
     constructor() {
-        // Пытаться включить лампочку каждую минуту
+        // Пытаться включить подсветку каждую минуту
         // с 07:50 до 07:59 c понедельника по пятницу
         schedule.scheduleJob(
             '50-59/1 7 * * 1-5',
@@ -12,11 +12,11 @@ export default class LightSchedule {
                 // если хоть одно устройство пользователя
                 // подкл. к локальной сети (актуально)
                 if (userDeviceController.isAnyDeviceActualNow()) {
-                    tuyaDeviceController.action('top', 'on')
+                    tuyaDeviceController.action('ambient', 'on')
                 }
             }
         );
-        // Пытаться включить подсветку каждую минуту
+        // Пытаться включить лампочку каждую минуту
         // с 08:00 до 08:05 c понедельника по пятницу
         schedule.scheduleJob(
             '0-5/1 8 * * 1-5',
@@ -24,7 +24,7 @@ export default class LightSchedule {
                 // если хоть одно устройство пользователя
                 // подкл. к локальной сети (актуально)
                 if (userDeviceController.isAnyDeviceActualNow()) {
-                    tuyaDeviceController.action('ambient', 'on')
+                    tuyaDeviceController.action('top', 'on')
                 }
             }
         );
