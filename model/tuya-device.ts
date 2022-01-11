@@ -1,6 +1,7 @@
 import TuyAPI from 'tuyapi'
 
 interface RawTuyaDevice {
+    type: 'bulb' | 'plug'
     id: number
     key: number
     name: string
@@ -14,6 +15,7 @@ interface TuyaDeviceEventMap {
 }
 
 export default class TuyaDevice {
+    readonly type: 'bulb' | 'plug';
     readonly id: any;                           // Уникальный идентификатор устройства
     readonly name: any;                         // Наименование устройства
     #device: any;                               // TuyAPI объект устройства
@@ -22,7 +24,8 @@ export default class TuyaDevice {
     #reconnection: boolean;                     // Флаг текущего процесса переподключения устройства
     readonly #eventMap: TuyaDeviceEventMap;     // Карта методов (коллбэков) на события устройства
 
-    constructor({id, key, name}: RawTuyaDevice) {
+    constructor({type, id, key, name}: RawTuyaDevice) {
+        this.type = type
         this.id = id
         this.name = name
         this.#device = new TuyAPI({id, key, version: 3.3})
@@ -30,13 +33,6 @@ export default class TuyaDevice {
 
         this.#device.on('connected', () => {
             console.log(`➕ Устройство «${this.name}» подключено!`);
-            // todo выпилить
-            if (this.name === 'top') {
-                this.#device.get().then((status) => {
-                    console.log(`Current status: ${status}.`);
-                });
-
-            }
             this.#connected = true;
             this.#eventMap?.connect && this.#eventMap.connect();
         });
@@ -48,8 +44,8 @@ export default class TuyaDevice {
         });
 
         this.#device.on('data', data => {
-            // todo выпилить
-            if (this.name === 'top') {
+            // todo рефактор
+            if (this.type === 'bulb') {
                 console.log('top data', data);
             }
 
@@ -130,14 +126,24 @@ export default class TuyaDevice {
     }
 
     async toggle(): Promise<void> {
+        // todo добавить обработку bulb
         if (this.#connected) await this.#device.toggle(1);
     }
 
     async on(): Promise<void> {
+        // todo рефактор
+        if (this.#connected && this.type === 'bulb') {
+            return this.#device.set({dps: 20, set: true}).then(() => console.log('bulb was turned on'))
+        }
         if (this.#connected) await this.#device.set({set: true});
+
     }
 
     async off(): Promise<void> {
+        // todo рефактор
+        if (this.#connected && this.type === 'bulb') {
+            return this.#device.set({dps: 20, set: false}).then(() => console.log('bulb was turned off'))
+        }
         if (this.#connected) await this.#device.set({set: false});
     }
 

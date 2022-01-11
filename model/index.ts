@@ -4,6 +4,7 @@ import UserDevice from './user-device'
 import User from './user'
 
 interface RawTuyaDevice {
+    type: 'bulb' | 'plug'
     id: number
     key: number
     name: string
