@@ -30,6 +30,13 @@ export default class TuyaDevice {
 
         this.#device.on('connected', () => {
             console.log(`➕ Устройство «${this.name}» подключено!`);
+            // todo выпилить
+            if (this.name === 'top') {
+                this.#device.get().then((status) => {
+                    console.log(`Current status: ${status}.`);
+                });
+
+            }
             this.#connected = true;
             this.#eventMap?.connect && this.#eventMap.connect();
         });
@@ -41,7 +48,8 @@ export default class TuyaDevice {
         });
 
         this.#device.on('data', data => {
-            if(this.name === 'top') {
+            // todo выпилить
+            if (this.name === 'top') {
                 console.log('top data', data);
             }
 
