@@ -41,6 +41,10 @@ export default class TuyaDevice {
         });
 
         this.#device.on('data', data => {
+            if(this.name === 'top') {
+                console.log('top data', data);
+            }
+
             if (!data.dps || this.#status === data.dps['1']) return;
             this.#status = data.dps['1'];
             this.#eventMap.data && this.#eventMap.data({status: this.#status});
