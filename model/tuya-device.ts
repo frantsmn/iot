@@ -7,13 +7,6 @@ interface RawTuyaDevice {
     name: string
 }
 
-interface TuyaDeviceEventMap {
-    connect?: () => any
-    disconnect?: () => any
-    data?: (TyuaDeviceEventData) => any
-    error?: (error: any) => any
-}
-
 export default class TuyaDevice {
     readonly type: 'bulb' | 'plug';             // Тип устройства
     readonly id: any;                           // Уникальный идентификатор устройства
@@ -22,60 +15,54 @@ export default class TuyaDevice {
     #status: boolean;                           // Статус устройства (вкл/выкл)
     #connected: boolean;                        // Состояние подключения устройства (подкл/откл)
     #reconnection: boolean;                     // Флаг текущего процесса переподключения устройства
-    readonly #eventMap: TuyaDeviceEventMap;     // Карта методов (коллбэков) на события устройства
 
     constructor({type, id, key, name}: RawTuyaDevice) {
         this.type = type
         this.id = id
         this.name = name
         this.#device = new TuyAPI({id, key, version: 3.3})
-        this.#eventMap = {}
 
         this.#device.on('connected', () => {
-            console.log(`➕ Устройство «${this.name}» подключено!`);
             this.#connected = true;
-            this.#eventMap?.connect && this.#eventMap.connect();
+            //TODO Logger
+            console.log(`➕ Устройство «${this.name}» подключено!`);
         });
-
         this.#device.on('disconnected', () => {
-            console.log(`❌ Устройство «${this.name}» отключено!`);
             this.#connected = false;
-            this.#eventMap?.disconnect && this.#eventMap.disconnect();
+            this.reconnect();
+            //TODO Logger
+            console.log(`❌ Устройство «${this.name}» отключено!`);
         });
-
         this.#device.on('data', data => {
             if (!data || !data.dps) return;
 
             switch (this.type) {
-                case 'bulb': {
-                    if (this.#status === data.dps['21']) break;
-                    this.#status = data.dps['21'];
-                    break;
-                }
+                // Не работает :(
+                // case 'bulb': {
+                //     if (this.status === Boolean(data.dps['20'])) break;
+                //     this.status = Boolean(data.dps['20']);
+                //     break;
+                // }
                 case 'plug': {
-                    if (this.#status === data.dps['1']) break;
-                    this.#status = data.dps['1'];
+                    if (this.status === Boolean(data.dps['1'])) break;
+                    this.status = data.dps['1'];
                     break;
                 }
                 default:
                     break;
             }
 
-            // Выполнение коллбэка, если он есть
-            this.#eventMap.data && this.#eventMap.data({status: this.#status});
-
             // TODO Logger
             console.log(
                 `[${(new Date).toLocaleTimeString('ru')}] `,
-                this.#status ? '⚫ ' : '⚪ ',
+                this.status ? '⚫ ' : '⚪ ',
                 `«${this.name}» `,
-                this.#status ? 'включено' : 'выключено'
+                this.status ? 'включено' : 'выключено'
             );
         });
-
         this.#device.on('error', async error => {
             console.log(`Ошибка с устройством «${this.name}»: ${error}`);
-            this.#eventMap.error && this.#eventMap.error(error);
+            this.reconnect();
         });
     }
 
@@ -96,7 +83,6 @@ export default class TuyaDevice {
             return false;
         }
     }
-
     async disconnect(): Promise<boolean> {
         if (!this.#connected) {
             console.log(`[tuya-device.ts] disconnect()\nУстройство «${this.name}» уже отключено`);
@@ -113,11 +99,12 @@ export default class TuyaDevice {
             return false;
         }
     }
-
     async reconnect(): Promise<void> {
-        if (this.#reconnection) return console.log(`[tuya-device.ts] > reconnect | Переподключение к устройству «${this.name}» уже запущено. Повтороное переподключение отменено!`);
+        if (this.#reconnection) {
+            return console.log(`[tuya-device.ts] > Отмена повтороного переподключения!`);
+        }
         this.#reconnection = true;
-        console.log(`[tuya-device.ts] > reconnect | Переподключение к устройству «${this.name}»`);
+        console.log(`[tuya-device.ts] > Переподключение к устройству «${this.name}»...`);
 
         let attemptCounter = 1;
         let timeoutSec = 5;
@@ -137,61 +124,79 @@ export default class TuyaDevice {
         reconnectAttempt();
     }
 
-    async toggle(): Promise<void> {
-        switch (this.type) {
-            case 'bulb': {
-                if (this.#connected) {
-                    await this.#device.toggle(1);
+    async toggle(): Promise<boolean> {
+        try {
+            switch (this.type) {
+                case 'bulb': {
+                    this.status = await this.#device.toggle(20);
+                    return this.status;
                 }
-                break;
-            }
-            case 'plug': {
-                if (this.#connected) {
-                    await this.#device.toggle(1);
+                case 'plug': {
+                    this.status = await this.#device.toggle(1);
+                    return this.status;
                 }
-                break;
             }
-            default:
-                break;
+        } catch (error) {
+            // TODO Logger
+            console.log(`Ошибка при переключении состояния устройства ${this.name}`, error);
         }
     }
-
-    async on(): Promise<void> {
-        // todo рефактор
-        if (this.#connected && this.type === 'bulb') {
-            return this.#device.set({dps: 20, set: true}).then(() => console.log('bulb was turned on'))
+    async on(): Promise<boolean> {
+        try {
+            switch (this.type) {
+                case 'bulb': {
+                    await this.#device.set({dps: 20, set: true});
+                    this.status = await this.#device.get({dps: 20});
+                    return this.status;
+                }
+                case 'plug': {
+                    await this.#device.set({dps: 1, set: true});
+                    this.status = await this.#device.get({dps: 1});
+                    return this.status;
+                }
+            }
+        } catch (error) {
+            // TODO Logger
+            console.log(`Ошибка при включении устройства ${this.name}`, error);
         }
-        if (this.#connected) await this.#device.set({set: true});
-
     }
-
-    async off(): Promise<void> {
-        // todo рефактор
-        if (this.#connected && this.type === 'bulb') {
-            return this.#device.set({dps: 20, set: false}).then(() => console.log('bulb was turned off'))
+    async off(): Promise<Boolean> {
+        try {
+            switch (this.type) {
+                case 'bulb': {
+                    this.#device.set({dps: 20, set: false});
+                    this.status = await this.#device.get({dps: 20});
+                    return this.status;
+                }
+                case 'plug': {
+                    this.#device.set({dps: 1, set: false});
+                    this.status = await this.#device.get({dps: 1});
+                    return this.status;
+                }
+            }
+        } catch (error) {
+            // TODO Logger
+            console.log(`Ошибка при выключении устройства ${this.name}`, error);
         }
-        if (this.#connected) await this.#device.set({set: false});
     }
 
     /**
-     * Определяет callback-функцию для событий
-     * @param eventName
-     * @param callback
+     * Получить статус устройства
      */
-    onEvent(eventName: 'connect' | 'disconnect' | 'data' | 'error', callback: () => any) {
-        this.#eventMap[eventName] = callback;
-    }
-
-    // todo ???
-    toggleBulb(device) {
-
-    }
-
-    /**
-     * Cтатус устройства
-     */
-    get status(): boolean {
-        return this.#status;
+    async getCurrentStatus(): Promise<boolean> {
+        try {
+            switch (this.type) {
+                case 'bulb': {
+                    return await this.#device.get({dps: 20});
+                }
+                case 'plug': {
+                    return await this.#device.get({dps: 1});
+                }
+            }
+        } catch (error) {
+            // TODO Logger
+            console.log(`Ошибка при получении статуса устройства ${this.name}`, error);
+        }
     }
 
     /**
@@ -199,5 +204,13 @@ export default class TuyaDevice {
      */
     get connected(): boolean {
         return this.#connected;
+    }
+
+    set status(value: any) {
+        this.#status = Boolean(value);
+    }
+
+    get status() {
+        return this.#status;
     }
 }

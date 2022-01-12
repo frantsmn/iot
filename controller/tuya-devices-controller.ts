@@ -8,13 +8,7 @@ export default class TuyaDevicesController {
 
     constructor(tuyaDevices: Array<TuyaDevice>) {
         this.devices = tuyaDevices;
-        this.devices.forEach(async device => {
-                const connectResult = await device.connect();
-                if (!connectResult) await device.reconnect();
-                await device.onEvent('disconnect', () => device.reconnect());
-                await device.onEvent('error', () => device.reconnect());
-            }
-        );
+        this.devices.forEach(async device => await device.connect());
     }
 
     /**
