@@ -8,6 +8,7 @@ export default class TuyaDevicesController {
 
     constructor(tuyaDevices: Array<TuyaDevice>) {
         this.devices = tuyaDevices;
+        console.log(this.devices)
     }
 
     /**
@@ -54,10 +55,10 @@ export default class TuyaDevicesController {
      * @private
      */
     private async getDeviceStatus(deviceName: string) {
-        const {isConnected, fetchCurrentStatus} = this.devices.find(({name}) => name === deviceName);
+        const device = this.devices.find(({name}) => name === deviceName);
         return {
-            connected: isConnected,
-            status: await fetchCurrentStatus()
+            connected: device.isConnected,
+            status: await device.fetchCurrentStatus()
         }
     }
 
@@ -67,12 +68,10 @@ export default class TuyaDevicesController {
      */
     private async getAllDevicesStatuses() {
         const response = {};
-
         for await (const device of this.devices) {
             const {name} = device;
             response[name] = await this.getDeviceStatus(name);
         }
-
         return response;
     }
 }
