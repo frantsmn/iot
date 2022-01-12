@@ -13,7 +13,6 @@ export default class TuyaDevice {
     readonly name: any;                         // Наименование устройства
     #device: any;                               // TuyAPI объект устройства
     #status: boolean;                           // Статус устройства (вкл/выкл)
-    #connected: boolean;                        // Состояние подключения устройства (подкл/откл)
     #reconnection: boolean;                     // Флаг текущего процесса переподключения устройства
 
     constructor({type, id, key, name}: RawTuyaDevice) {
@@ -22,13 +21,9 @@ export default class TuyaDevice {
         this.name = name
         this.#device = new TuyAPI({id, key, version: 3.3})
 
-        this.#device.on('connected', () => {
-            this.#connected = true;
-            //TODO Logger
-            console.log(`➕ Устройство «${this.name}» подключено!`);
-        });
+        //TODO Logger
+        this.#device.on('connected', () => console.log(`➕ Устройство «${this.name}» подключено!`));
         this.#device.on('disconnected', async () => {
-            this.#connected = false;
             //TODO Logger
             console.log(`❌ Устройство «${this.name}» отключено!`);
             await this.reconnect();
@@ -38,10 +33,8 @@ export default class TuyaDevice {
 
             switch (this.type) {
                 case 'bulb': {
-                    // TODO remove
-                    console.log(this.name, data);
                     if (this.status === Boolean(data.dps['20'])) break;
-                    this.status = Boolean(data.dps['20']);
+                    this.status = data.dps['20'];
                     // TODO Logger
                     console.log(
                         `[${(new Date).toLocaleTimeString('ru')}] `,
@@ -54,7 +47,6 @@ export default class TuyaDevice {
                 case 'plug': {
                     if (this.status === Boolean(data.dps['1'])) break;
                     this.status = data.dps['1'];
-
                     // TODO Logger
                     console.log(
                         `[${(new Date).toLocaleTimeString('ru')}] `,
@@ -71,31 +63,32 @@ export default class TuyaDevice {
         this.#device.on('error', async error => {
             // TODO Logger
             console.log(`Ошибка с устройством «${this.name}»: ${error}`);
+            // Если вдруг устройство после какой-нибудь ошибки не переподключится
+            // то вернуть эту строчку
             // this.reconnect();
+        });
+
+        this.connect().catch((error) => {
+            // TODO Logger
+            console.error(`Ошибка при создании TuyaDevice ${this.name}`, error);
         });
     }
 
     async connect(): Promise<boolean> {
-        if (this.#connected) {
-            console.log(`[tuya-device] Устройство «${this.name}» уже подключено`);
-            return true;
-        }
         try {
             await this.#device.find();
             await this.#device.connect();
             return true;
         } catch (error) {
-            console.error(
-                `[tuya-device] Ошибка при подключении устройства «${this.name}»\n`,
-                error
-            );
+            // TODO Logger
+            console.error(`Ошибка при подключении устройства ${this.name}`, error);
             return false;
         }
     }
 
     async disconnect(): Promise<boolean> {
-        if (!this.#connected) {
-            console.log(`[tuya-device.ts] disconnect()\nУстройство «${this.name}» уже отключено`);
+        if (!this.isConnected) {
+            console.log(`[tuya-device] Устройство «${this.name}» уже отключено`);
             return true;
         }
         try {
@@ -103,7 +96,7 @@ export default class TuyaDevice {
             return true;
         } catch (error) {
             console.error(
-                `[tuya-device.ts] disconnect()\nОшибка при отключении устройства «${this.name}»\n`,
+                `[tuya-device] Ошибка при отключении устройства «${this.name}»\n`,
                 error
             );
             return false;
@@ -112,20 +105,19 @@ export default class TuyaDevice {
 
     async reconnect(): Promise<void> {
         if (this.#reconnection) {
-            return console.log(`[tuya-device] Отмена повтороного переподключения!`);
+            return console.log(`Отмена повтороного переподключения!`);
         }
         this.#reconnection = true;
-        console.log(`[tuya-device] Переподключение к устройству «${this.name}»...`);
+        console.log(`Переподключение к устройству «${this.name}»...`);
 
         let attemptCounter = 1;
         let timeoutSec = 5;
         const reconnectAttempt = () => {
-            console.log(`[tuya-device] Попытка подключения #${attemptCounter++} к «${this.name}» через ${timeoutSec} сек...`);
+            console.log(`Попытка подключения #${attemptCounter++} к «${this.name}» через ${timeoutSec} сек...`);
             setTimeout(async () => {
                 const result = await this.connect();
                 if (result) {
                     this.#reconnection = false;
-                    return console.log(`[tuya-device] Устройство «${this.name}» переподключено!`);
                 } else {
                     timeoutSec += Boolean(attemptCounter % 5) ? 0 : 5;
                     reconnectAttempt();
@@ -140,11 +132,11 @@ export default class TuyaDevice {
             switch (this.type) {
                 case 'bulb': {
                     this.status = await this.#device.toggle(20);
-                    return this.status;
+                    return;
                 }
                 case 'plug': {
                     this.status = await this.#device.toggle(1);
-                    return this.status;
+                    return;
                 }
             }
         } catch (error) {
@@ -159,12 +151,12 @@ export default class TuyaDevice {
                 case 'bulb': {
                     await this.#device.set({dps: 20, set: true});
                     this.status = await this.#device.get({dps: 20});
-                    return this.status;
+                    return;
                 }
                 case 'plug': {
                     await this.#device.set({dps: 1, set: true});
                     this.status = await this.#device.get({dps: 1});
-                    return this.status;
+                    return;
                 }
             }
         } catch (error) {
@@ -179,12 +171,12 @@ export default class TuyaDevice {
                 case 'bulb': {
                     this.#device.set({dps: 20, set: false});
                     this.status = await this.#device.get({dps: 20});
-                    return this.status;
+                    return;
                 }
                 case 'plug': {
                     this.#device.set({dps: 1, set: false});
                     this.status = await this.#device.get({dps: 1});
-                    return this.status;
+                    return;
                 }
             }
         } catch (error) {
@@ -194,16 +186,16 @@ export default class TuyaDevice {
     }
 
     /**
-     * Получить статус устройства
+     * Запросить текущий статус устройства
      */
-    async getCurrentStatus(): Promise<boolean> {
+    async fetchCurrentStatus(): Promise<boolean> {
         try {
             switch (this.type) {
                 case 'bulb': {
-                    return await this.#device.get({dps: 20});
+                    return Boolean(await this.#device.get({dps: 20}));
                 }
                 case 'plug': {
-                    return await this.#device.get({dps: 1});
+                    return Boolean(await this.#device.get({dps: 1}));
                 }
             }
         } catch (error) {
@@ -213,10 +205,11 @@ export default class TuyaDevice {
     }
 
     /**
-     *  Cоединение с устройством
+     *  Текущее соединение с устройством
+     *  @returns {boolean}
      */
-    get connected(): boolean {
-        return this.#connected;
+    get isConnected(): boolean {
+        return this.#device.isConnected();
     }
 
     set status(value: any) {

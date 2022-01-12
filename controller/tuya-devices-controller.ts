@@ -8,48 +8,70 @@ export default class TuyaDevicesController {
 
     constructor(tuyaDevices: Array<TuyaDevice>) {
         this.devices = tuyaDevices;
-        this.devices.forEach(async device => await device.connect());
     }
 
     /**
      * Получить статус
-     * @param deviceName имя устройства
+     * @param {'all' | string} deviceName имя устройства
      */
-    status(deviceName: string) {
-        if (deviceName === 'all') {
-            const response = {};
-            for (const {name, connected, status} of this.devices) {
-                response[name] = {connected, status};
+    public async status(deviceName: 'all' | string) {
+        switch (deviceName) {
+            case 'all': {
+                return await this.getAllDevicesStatuses();
             }
-            return response;
-        } else {
-            const device = this.devices.find(({name}) => name === deviceName);
-            if (!device) return;
-            const {connected, status} = device;
-            return {connected, status};
+            default:
+                return await this.getDeviceStatus(deviceName);
         }
     }
 
     /**
      * Выполнить действие
-     * @param deviceName имя устройства
-     * @param actionType тип действия
+     * @param {string} deviceName имя устройства
+     * @param {'all' | string} actionType тип действия
      */
-    async action(
-        deviceName: DeviceNames,
-        actionType: DeviceActionTypes
-    ): Promise<void> {
-        if (deviceName === 'all') {
-            for await (const device of this.devices) {
-                if (actionType in device) {
+    public async action(deviceName: DeviceNames, actionType: DeviceActionTypes): Promise<void> {
+        switch (actionType) {
+            case 'all': {
+                for await (const device of this.devices) {
+                    if (actionType in device) {
+                        await device[actionType]();
+                    }
+                }
+                break;
+            }
+            default: {
+                const device = this.devices.find(({name}) => name === deviceName);
+                if (device && actionType in device) {
                     await device[actionType]();
                 }
             }
-        } else {
-            const device = this.devices.find(({name}) => name === deviceName);
-            if (device && actionType in device) {
-                await device[actionType]();
-            }
         }
+    }
+
+    /**
+     * Получение статуса устройства
+     * @param {string} deviceName имя устройства
+     * @private
+     */
+    private async getDeviceStatus(deviceName: string) {
+        const {isConnected, fetchCurrentStatus} = this.devices.find(({name}) => name === deviceName);
+        return {
+            connected: isConnected,
+            status: await fetchCurrentStatus()
+        }
+    }
+
+    /**
+     * Получение статусов всех устройств
+     * @private
+     */
+    private async getAllDevicesStatuses() {
+        const response = {};
+
+        for await (const {name} of this.devices) {
+            response[name] = await this.getDeviceStatus(name);
+        }
+
+        return response;
     }
 }

@@ -7,13 +7,13 @@ router.get('/action/:device/:action', async (
     req,
     res) => {
     await tuyaDeviceController.action(req.params.device, req.params.action);
-    res.json(tuyaDeviceController.status(req.params.device));
+    res.json(await tuyaDeviceController.status(req.params.device));
 });
 
-router.get('/status/:device', (
+router.get('/status/:device', async (
     req,
     res) => {
-    res.json(tuyaDeviceController.status(req.params.device));
+    res.json(await tuyaDeviceController.status(req.params.device));
 });
 
 export default router;
