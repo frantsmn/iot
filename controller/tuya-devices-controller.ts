@@ -68,7 +68,8 @@ export default class TuyaDevicesController {
     private async getAllDevicesStatuses() {
         const response = {};
 
-        for await (const {name} of this.devices) {
+        for await (const device of this.devices) {
+            const {name} = device;
             response[name] = await this.getDeviceStatus(name);
         }
 
