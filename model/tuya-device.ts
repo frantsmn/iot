@@ -27,42 +27,51 @@ export default class TuyaDevice {
             //TODO Logger
             console.log(`➕ Устройство «${this.name}» подключено!`);
         });
-        this.#device.on('disconnected', () => {
+        this.#device.on('disconnected', async () => {
             this.#connected = false;
-            this.reconnect();
             //TODO Logger
             console.log(`❌ Устройство «${this.name}» отключено!`);
+            await this.reconnect();
         });
         this.#device.on('data', data => {
             if (!data || !data.dps) return;
 
             switch (this.type) {
-                // Не работает :(
-                // case 'bulb': {
-                //     if (this.status === Boolean(data.dps['20'])) break;
-                //     this.status = Boolean(data.dps['20']);
-                //     break;
-                // }
+                case 'bulb': {
+                    // TODO remove
+                    console.log(this.name, data);
+                    if (this.status === Boolean(data.dps['20'])) break;
+                    this.status = Boolean(data.dps['20']);
+                    // TODO Logger
+                    console.log(
+                        `[${(new Date).toLocaleTimeString('ru')}] `,
+                        this.status ? '⚫ ' : '⚪ ',
+                        `«${this.name}» `,
+                        this.status ? 'включено' : 'выключено'
+                    );
+                    break;
+                }
                 case 'plug': {
                     if (this.status === Boolean(data.dps['1'])) break;
                     this.status = data.dps['1'];
+
+                    // TODO Logger
+                    console.log(
+                        `[${(new Date).toLocaleTimeString('ru')}] `,
+                        this.status ? '⚫ ' : '⚪ ',
+                        `«${this.name}» `,
+                        this.status ? 'включено' : 'выключено'
+                    );
                     break;
                 }
                 default:
                     break;
             }
-
-            // TODO Logger
-            console.log(
-                `[${(new Date).toLocaleTimeString('ru')}] `,
-                this.status ? '⚫ ' : '⚪ ',
-                `«${this.name}» `,
-                this.status ? 'включено' : 'выключено'
-            );
         });
         this.#device.on('error', async error => {
+            // TODO Logger
             console.log(`Ошибка с устройством «${this.name}»: ${error}`);
-            this.reconnect();
+            // this.reconnect();
         });
     }
 
@@ -83,6 +92,7 @@ export default class TuyaDevice {
             return false;
         }
     }
+
     async disconnect(): Promise<boolean> {
         if (!this.#connected) {
             console.log(`[tuya-device.ts] disconnect()\nУстройство «${this.name}» уже отключено`);
@@ -99,6 +109,7 @@ export default class TuyaDevice {
             return false;
         }
     }
+
     async reconnect(): Promise<void> {
         if (this.#reconnection) {
             return console.log(`[tuya-device] Отмена повтороного переподключения!`);
@@ -141,6 +152,7 @@ export default class TuyaDevice {
             console.log(`Ошибка при переключении состояния устройства ${this.name}`, error);
         }
     }
+
     async on(): Promise<boolean> {
         try {
             switch (this.type) {
@@ -160,6 +172,7 @@ export default class TuyaDevice {
             console.log(`Ошибка при включении устройства ${this.name}`, error);
         }
     }
+
     async off(): Promise<Boolean> {
         try {
             switch (this.type) {
