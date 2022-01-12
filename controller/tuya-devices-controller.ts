@@ -8,7 +8,6 @@ export default class TuyaDevicesController {
 
     constructor(tuyaDevices: Array<TuyaDevice>) {
         this.devices = tuyaDevices;
-        console.log(this.devices)
     }
 
     /**
