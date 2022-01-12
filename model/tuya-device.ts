@@ -68,7 +68,7 @@ export default class TuyaDevice {
 
     async connect(): Promise<boolean> {
         if (this.#connected) {
-            console.log(`[tuya-device.ts] connect()\nУстройство «${this.name}» уже подключено`);
+            console.log(`[tuya-device] Устройство «${this.name}» уже подключено`);
             return true;
         }
         try {
@@ -77,7 +77,7 @@ export default class TuyaDevice {
             return true;
         } catch (error) {
             console.error(
-                `[tuya-device.ts] connect()\nОшибка при подключении устройства «${this.name}»\n`,
+                `[tuya-device] Ошибка при подключении устройства «${this.name}»\n`,
                 error
             );
             return false;
@@ -101,20 +101,20 @@ export default class TuyaDevice {
     }
     async reconnect(): Promise<void> {
         if (this.#reconnection) {
-            return console.log(`[tuya-device.ts] > Отмена повтороного переподключения!`);
+            return console.log(`[tuya-device] Отмена повтороного переподключения!`);
         }
         this.#reconnection = true;
-        console.log(`[tuya-device.ts] > Переподключение к устройству «${this.name}»...`);
+        console.log(`[tuya-device] Переподключение к устройству «${this.name}»...`);
 
         let attemptCounter = 1;
         let timeoutSec = 5;
         const reconnectAttempt = () => {
-            console.log(`[tuya-device.ts] > reconnect | Попытка подключения #${attemptCounter++} к устройству «${this.name}» через ${timeoutSec} сек...`);
+            console.log(`[tuya-device] Попытка подключения #${attemptCounter++} к «${this.name}» через ${timeoutSec} сек...`);
             setTimeout(async () => {
                 const result = await this.connect();
                 if (result) {
                     this.#reconnection = false;
-                    return console.log(`[tuya-device.ts] > reconnect | Устройство «${this.name}» переподключено!`);
+                    return console.log(`[tuya-device] Устройство «${this.name}» переподключено!`);
                 } else {
                     timeoutSec += Boolean(attemptCounter % 5) ? 0 : 5;
                     reconnectAttempt();
