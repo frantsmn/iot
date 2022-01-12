@@ -6,26 +6,21 @@ export default class UserDevicesController {
 
     constructor(userDevices: Array<UserDevice>) {
         this.devices = userDevices;
-    }
 
-    async scanDevice(device: UserDevice) {
         if (process.platform !== "linux") {
             console.log('Not a linux environment!')
         }
+    }
 
-        // Find a single device by ip address.
+    async scanDevice(device: UserDevice) {
+        if (process.platform !== "linux") return;
+
         const result: any = await find(device.ip);
-        /*
-        todo: replace "any" by interface
-        result:
-          {
-            name: '?',
-            ip: '192.168.10.10',
-            mac: '...'
-          }
-        */
+
         if (result && result.mac.toUpperCase() === device.macWifi) {
-            device.setState({timestamp: Date.now(), status: true});
+            device.setState(true);
+        } else {
+            device.setState(false);
         }
     }
 
@@ -34,7 +29,7 @@ export default class UserDevicesController {
         return await Promise.all(devicePromises);
     }
 
-    isAnyDeviceActualNow() {
-        return Boolean(this.devices.find(device => device.isActual));
+    isAnyDeviceConnected() {
+        return Boolean(this.devices.find(device => device.isConnected));
     }
 }

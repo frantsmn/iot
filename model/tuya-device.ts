@@ -15,7 +15,7 @@ interface TuyaDeviceEventMap {
 }
 
 export default class TuyaDevice {
-    readonly type: 'bulb' | 'plug';
+    readonly type: 'bulb' | 'plug';             // Тип устройства
     readonly id: any;                           // Уникальный идентификатор устройства
     readonly name: any;                         // Наименование устройства
     #device: any;                               // TuyAPI объект устройства
@@ -44,15 +44,27 @@ export default class TuyaDevice {
         });
 
         this.#device.on('data', data => {
-            // todo рефактор
-            if (this.type === 'bulb') {
-                console.log('top data', data);
+            if (!data || !data.dps) return;
+
+            switch (this.type) {
+                case 'bulb': {
+                    if (this.#status === data.dps['21']) break;
+                    this.#status = data.dps['21'];
+                    break;
+                }
+                case 'plug': {
+                    if (this.#status === data.dps['1']) break;
+                    this.#status = data.dps['1'];
+                    break;
+                }
+                default:
+                    break;
             }
 
-            if (!data.dps || this.#status === data.dps['1']) return;
-            this.#status = data.dps['1'];
+            // Выполнение коллбэка, если он есть
             this.#eventMap.data && this.#eventMap.data({status: this.#status});
 
+            // TODO Logger
             console.log(
                 `[${(new Date).toLocaleTimeString('ru')}] `,
                 this.#status ? '⚫ ' : '⚪ ',
@@ -126,8 +138,22 @@ export default class TuyaDevice {
     }
 
     async toggle(): Promise<void> {
-        // todo добавить обработку bulb
-        if (this.#connected) await this.#device.toggle(1);
+        switch (this.type) {
+            case 'bulb': {
+                if (this.#connected) {
+                    await this.#device.toggle(1);
+                }
+                break;
+            }
+            case 'plug': {
+                if (this.#connected) {
+                    await this.#device.toggle(1);
+                }
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     async on(): Promise<void> {
@@ -154,6 +180,11 @@ export default class TuyaDevice {
      */
     onEvent(eventName: 'connect' | 'disconnect' | 'data' | 'error', callback: () => any) {
         this.#eventMap[eventName] = callback;
+    }
+
+    // todo ???
+    toggleBulb(device) {
+
     }
 
     /**

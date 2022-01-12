@@ -5,81 +5,58 @@ interface RawUserDevice {
     ip: string
 }
 
-interface DeviceState {
-    timestamp: number
-    status: boolean
-}
-
 export default class UserDevice {
     readonly name: string
     readonly ip: string
     readonly macWifi: string
     readonly macBluetooth?: string
-    lastCheck: number
-    lastSuccessfulCheck: number
-    #isActual: boolean
-    actualityTime: number
-    #timeoutId: NodeJS.Timeout;
+    #isConnected: boolean
+    #lastUpdate: number
+    #lastCheck: number
 
     constructor(device: RawUserDevice) {
         this.name = device.name;
         this.macWifi = device.mac_wifi;
         this.ip = device.ip;
-        this.lastCheck = null;
-        this.lastSuccessfulCheck = null;
-        this.#isActual = false;
-        this.actualityTime = 120_000; //2 min
-        this.#timeoutId = null;
-
-        // setInterval(() => {
-        //     const endTime = this.lastSuccessfulCheck + this.actualityTime;
-        //     const timeLeft = endTime - Date.now();
-        //     if (this.lastSuccessfulCheck) {
-        //         const mins: number = parseInt(String(timeLeft / 1000 / 60));
-        //         const secs: number = parseInt(String(timeLeft / 1000 % 60));
-        //         const minsStr = mins > 0 ? `${mins} min` : '0 min';
-        //         const secStr = secs > 0 ? `${secs} sec` : '0 sec';
-        //         if (mins > 0 || secs > 0) {
-        //             console.log(`[${(new Date).toLocaleTimeString('ru-RU')}] ${minsStr} ${secStr}`);
-        //         }
-        //     }
-        // }, 30_000);
+        this.#isConnected = false;
+        this.#lastUpdate = null;
+        this.#lastCheck = null;
     }
 
-    /**
-     * Устанавливает состояние актуальности для устройства пользователя
-     */
-    setState({timestamp, status}: DeviceState) {
-        // Обновляет время последней проверки
-        this.lastCheck = timestamp;
-        // Обновляет время последней успешной проверки
-        this.lastSuccessfulCheck = status ? timestamp : this.lastSuccessfulCheck;
-        // Обновляет актуальность устройства
-        this.isActual = status || this.isActual;
-        // Устанавливает таймер актуальности устройства
-        this.setActualityTimeout();
-    }
-
-    /**
-     * Устанавливает таймер по истечении которого
-     * актуальность устройства будет утеряна
-     */
-    setActualityTimeout() {
-        clearTimeout(this.#timeoutId);
-        this.#timeoutId = setTimeout(() => {
-            this.isActual = false;
-        }, this.actualityTime)
-    }
-
-    set isActual(state: boolean) {
-        if (this.#isActual !== undefined && this.#isActual != state) {
-            console.log(`[${(new Date).toLocaleTimeString('ru-RU')}] Устройство "${this.name}" ${state ? 'актуально' : 'больше не актуально'}`);
+    setState(state: boolean) {
+        if (this.#isConnected !== state) {
+            this.#isConnected = state;
+            this.#lastUpdate = Date.now();
+            // TODO Logger
+            console.log(`[${(new Date).toLocaleTimeString('ru-RU')}] Устройство "${this.name}" ${state ? 'в сети' : 'отключено'}`);
         }
-
-        this.#isActual = state;
+        // Обновляет время последней проверки
+        this.#lastCheck = Date.now();
     }
 
-    get isActual() {
-        return this.#isActual;
+    /**
+     * Состояние устройства
+     * @returns boolean
+     */
+    get isConnected() {
+        return this.#isConnected;
+    }
+
+    /**
+     * Время последней попытки обновления
+     * состояния устройства
+     * @returns {number} - timestamp
+     */
+    get lastCheck() {
+        return this.#lastCheck;
+    }
+
+    /**
+     * Время последней успешной попытки обновления
+     * состояния устройства
+     * @returns {number} - timestamp
+     */
+    get lastUpdate() {
+        return this.#lastUpdate;
     }
 }

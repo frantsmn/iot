@@ -11,7 +11,7 @@ export default class LightSchedule {
             () => {
                 // если хоть одно устройство пользователя
                 // подкл. к локальной сети (актуально)
-                if (userDeviceController.isAnyDeviceActualNow()) {
+                if (userDeviceController.isAnyDeviceConnected()) {
                     tuyaDeviceController.action('ambient', 'on')
                 }
             }
@@ -23,7 +23,7 @@ export default class LightSchedule {
             () => {
                 // если хоть одно устройство пользователя
                 // подкл. к локальной сети (актуально)
-                if (userDeviceController.isAnyDeviceActualNow()) {
+                if (userDeviceController.isAnyDeviceConnected()) {
                     tuyaDeviceController.action('top', 'on')
                 }
             }
