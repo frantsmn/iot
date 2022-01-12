@@ -16,9 +16,8 @@ export default class TuyaDevicesController {
      */
     public async status(deviceName: 'all' | string) {
         switch (deviceName) {
-            case 'all': {
+            case 'all':
                 return await this.getAllDevicesStatuses();
-            }
             default:
                 return await this.getDeviceStatus(deviceName);
         }
@@ -30,21 +29,11 @@ export default class TuyaDevicesController {
      * @param {'all' | string} actionType тип действия
      */
     public async action(deviceName: DeviceNames, actionType: DeviceActionTypes): Promise<void> {
-        switch (actionType) {
-            case 'all': {
-                for await (const device of this.devices) {
-                    if (actionType in device) {
-                        await device[actionType]();
-                    }
-                }
-                break;
-            }
-            default: {
-                const device = this.devices.find(({name}) => name === deviceName);
-                if (device && actionType in device) {
-                    await device[actionType]();
-                }
-            }
+        switch (deviceName) {
+            case 'all':
+                return await this.callActionForAllDevices(actionType);
+            default:
+                return await this.callDeviceAction(deviceName, actionType);
         }
     }
 
@@ -72,5 +61,20 @@ export default class TuyaDevicesController {
             response[name] = await this.getDeviceStatus(name);
         }
         return response;
+    }
+
+    private async callDeviceAction(deviceName: DeviceNames, actionType: DeviceActionTypes) {
+        const device = this.devices.find(({name}) => name === deviceName);
+        if (device && actionType in device) {
+            await device[actionType]();
+        }
+    }
+
+    private async callActionForAllDevices(actionType: DeviceActionTypes) {
+        for (const device of this.devices) {
+            if (actionType in device) {
+                await device[actionType]();
+            }
+        }
     }
 }
