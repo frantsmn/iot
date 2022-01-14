@@ -1,6 +1,6 @@
 import TuyaDevice from "../model/tuya-device"
 
-type DeviceActionTypes = 'on' | 'off' | 'toggle' | string;
+type DeviceActionTypes = 'on' | 'off' | 'toggle' | 'dps' | string;
 type DeviceNames = 'all' | string;
 
 export default class TuyaDevicesController {
@@ -27,18 +27,20 @@ export default class TuyaDevicesController {
      * Выполнить действие
      * @param {string} deviceName имя устройства
      * @param {'all' | string} actionType тип действия
+     * @param {object} data данные из запроса
      */
-    public async action(deviceName: DeviceNames, actionType: DeviceActionTypes): Promise<void> {
+    public async action(deviceName: DeviceNames, actionType: DeviceActionTypes, data = {}): Promise<void> {
         switch (deviceName) {
             case 'all':
-                return await this.callActionForAllDevices(actionType);
+                return await this.callActionForAllDevices(actionType, data);
             default:
-                return await this.callDeviceAction(deviceName, actionType);
+                return await this.callDeviceAction(deviceName, actionType, data);
         }
     }
 
+
     /**
-     * Получение статуса устройства
+     * Метод получения статуса устройства
      * @param {string} deviceName имя устройства
      * @private
      */
@@ -51,7 +53,7 @@ export default class TuyaDevicesController {
     }
 
     /**
-     * Получение статусов всех устройств
+     * Метод получения статусов всех устройств
      * @private
      */
     private async getAllDevicesStatuses() {
@@ -63,17 +65,28 @@ export default class TuyaDevicesController {
         return response;
     }
 
-    private async callDeviceAction(deviceName: DeviceNames, actionType: DeviceActionTypes) {
+    /**
+     * Метод выполнения действия
+     * @param {string} deviceName имя устройства
+     * @param {'all' | string} actionType тип действия
+     * @param {object} data данные из запроса
+     */
+    private async callDeviceAction(deviceName: DeviceNames, actionType: DeviceActionTypes, data) {
         const device = this.devices.find(({name}) => name === deviceName);
         if (device && actionType in device) {
-            await device[actionType]();
+            await device[actionType](data);
         }
     }
 
-    private async callActionForAllDevices(actionType: DeviceActionTypes) {
+    /**
+     * Метод выполнения действия для всех устройств
+     * @param {'all' | string} actionType тип действия
+     * @param {object} data данные из запроса
+     */
+    private async callActionForAllDevices(actionType: DeviceActionTypes, data) {
         for (const device of this.devices) {
             if (actionType in device) {
-                await device[actionType]();
+                await device[actionType](data);
             }
         }
     }

@@ -9,6 +9,7 @@ import './scheduler';
 const app = express();
 const port = 3001;
 app.listen(port, () => console.log(`IoT service started on port ${port}`));
+app.use(express.json());
 app.use(auth);
 app.use(router);
 app.use(error);

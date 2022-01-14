@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/action/:device/:action', async (
     req,
     res) => {
-    await tuyaDeviceController.action(req.params.device, req.params.action);
+    await tuyaDeviceController.action(req.params.device, req.params.action, req.body);
     res.json(await tuyaDeviceController.status(req.params.device));
 });
 

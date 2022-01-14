@@ -186,6 +186,18 @@ export default class TuyaDevice {
     }
 
     /**
+     * Установить состояние для устройства
+     * @param data
+     */
+    async dps(data) {
+        // console.log('req', data);
+        await this.#device.set({
+            multiple: true,
+            data
+        });
+    }
+
+    /**
      * Запросить текущий статус устройства
      */
     async fetchCurrentStatus(): Promise<boolean> {
