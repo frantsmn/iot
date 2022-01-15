@@ -10,6 +10,13 @@ router.get('/action/:device/:action', async (
     res.json(await tuyaDeviceController.status(req.params.device));
 });
 
+router.post('/action/:device/dps', async (
+    req,
+    res) => {
+    await tuyaDeviceController.action(req.params.device, 'dps', req.body);
+    res.json(await tuyaDeviceController.status(req.params.device));
+});
+
 router.get('/status/:device', async (
     req,
     res) => {
