@@ -1,4 +1,7 @@
 import TuyAPI from 'tuyapi'
+import loggerCreator from '../logger/index'
+
+const log = loggerCreator('tuya-device');
 
 interface RawTuyaDevice {
     type: 'bulb' | 'plug'
@@ -21,11 +24,9 @@ export default class TuyaDevice {
         this.name = name
         this.#device = new TuyAPI({id, key, version: 3.3})
 
-        //TODO Logger
-        this.#device.on('connected', () => console.log(`➕ Устройство «${this.name}» подключено!`));
+        this.#device.on('connected', () => log.info(`➕ <${this.name}> подключено`));
         this.#device.on('disconnected', async () => {
-            //TODO Logger
-            console.log(`❌ Устройство «${this.name}» отключено!`);
+            log.warn(`❌ <${this.name}> отключено!`);
             await this.reconnect();
         });
         this.#device.on('data', data => {
@@ -35,25 +36,13 @@ export default class TuyaDevice {
                 case 'bulb': {
                     if (this.status === Boolean(data.dps['20'])) break;
                     this.status = data.dps['20'];
-                    // TODO Logger
-                    console.log(
-                        `[${(new Date).toLocaleTimeString('ru')}] `,
-                        this.status ? '⚫ ' : '⚪ ',
-                        `«${this.name}» `,
-                        this.status ? 'включено' : 'выключено'
-                    );
+                    log.info(`${this.status ? '⚫' : '⚪'} <${this.name}> ${this.status ? 'ВКЛ' : 'ВЫКЛ'}`);
                     break;
                 }
                 case 'plug': {
                     if (this.status === Boolean(data.dps['1'])) break;
                     this.status = data.dps['1'];
-                    // TODO Logger
-                    console.log(
-                        `[${(new Date).toLocaleTimeString('ru')}] `,
-                        this.status ? '⚫ ' : '⚪ ',
-                        `«${this.name}» `,
-                        this.status ? 'включено' : 'выключено'
-                    );
+                    log.info(`${this.status ? '⚫' : '⚪'} <${this.name}> ${this.status ? 'ВКЛ' : 'ВЫКЛ'}`);
                     break;
                 }
                 default:
@@ -61,16 +50,14 @@ export default class TuyaDevice {
             }
         });
         this.#device.on('error', async error => {
-            // TODO Logger
-            console.log(`Ошибка с устройством «${this.name}»: ${error}`);
+            log.error(`Ошибка с <${this.name}>: ${error}`);
             // Если вдруг устройство после какой-нибудь ошибки не переподключится
             // то вернуть эту строчку
             // this.reconnect();
         });
 
         this.connect().catch((error) => {
-            // TODO Logger
-            console.error(`Ошибка при создании TuyaDevice ${this.name}`, error);
+            log.error(`Ошибка при создании TuyaDevice <${this.name}>`, error);
         });
     }
 
@@ -80,40 +67,37 @@ export default class TuyaDevice {
             await this.#device.connect();
             return true;
         } catch (error) {
-            // TODO Logger
-            console.error(`Ошибка при подключении устройства ${this.name}`, error);
+            log.error(`Ошибка при подключении <${this.name}>`, error);
             return false;
         }
     }
 
     async disconnect(): Promise<boolean> {
         if (!this.isConnected) {
-            console.log(`[tuya-device] Устройство «${this.name}» уже отключено`);
+            log.silly(`Устройство <${this.name}> уже отключено`);
             return true;
         }
         try {
             await this.#device.disconnect();
             return true;
         } catch (error) {
-            console.error(
-                `[tuya-device] Ошибка при отключении устройства «${this.name}»\n`,
-                error
-            );
+            log.error(`Ошибка при отключении <${this.name}>`, error);
             return false;
         }
     }
 
     async reconnect(): Promise<void> {
         if (this.#reconnection) {
-            return console.log(`Отмена повтороного переподключения!`);
+            log.silly(`Отмена повторного переподключения к <${this.name}>!`);
+            return;
         }
         this.#reconnection = true;
-        console.log(`Переподключение к устройству «${this.name}»...`);
+        log.info(`Переподключение к <${this.name}>...`);
 
         let attemptCounter = 1;
         let timeoutSec = 5;
         const reconnectAttempt = () => {
-            console.log(`Попытка подключения #${attemptCounter++} к «${this.name}» через ${timeoutSec} сек...`);
+            log.info(`Попытка подключения #${attemptCounter++} к <${this.name}> через ${timeoutSec} сек...`);
             setTimeout(async () => {
                 const result = await this.connect();
                 if (result) {
@@ -140,8 +124,7 @@ export default class TuyaDevice {
                 }
             }
         } catch (error) {
-            // TODO Logger
-            console.log(`Ошибка при переключении состояния устройства ${this.name}`, error);
+            log.error(`Ошибка при переключении состояния <${this.name}>`, error);
         }
     }
 
@@ -160,8 +143,7 @@ export default class TuyaDevice {
                 }
             }
         } catch (error) {
-            // TODO Logger
-            console.log(`Ошибка при включении устройства ${this.name}`, error);
+            log.error(`Ошибка при включении <${this.name}>`, error);
         }
     }
 
@@ -180,8 +162,7 @@ export default class TuyaDevice {
                 }
             }
         } catch (error) {
-            // TODO Logger
-            console.log(`Ошибка при выключении устройства ${this.name}`, error);
+            log.error(`Ошибка при выключении <${this.name}>`, error);
         }
     }
 
@@ -190,7 +171,6 @@ export default class TuyaDevice {
      * @param data
      */
     async dps(data) {
-        // console.log('req', data);
         await this.#device.set({
             multiple: true,
             data
@@ -211,8 +191,7 @@ export default class TuyaDevice {
                 }
             }
         } catch (error) {
-            // TODO Logger
-            console.log(`Ошибка при получении статуса устройства ${this.name}`, error);
+            log.error(`Ошибка при получении статуса <${this.name}>`, error);
         }
     }
 

@@ -14,7 +14,7 @@ export default class LightSchedule {
             }
         );
         // Включать подсветку в 08:10 если к WiFi подключен телефон
-        const s = schedule.scheduleJob(
+        schedule.scheduleJob(
             {hour: 8, minute: 10, dayOfWeek: [1, 2, 3, 4, 5]},
             async () => {
                 if (userDeviceController.isAnyDeviceConnected()) {

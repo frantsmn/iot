@@ -19,7 +19,8 @@
     "express": "^4.17.1",
     "local-devices": "^3.2.0",
     "node-schedule": "^2.1.0",
-    "tuyapi": "^7.2.0"
+    "tuyapi": "^7.2.0",
+    "winston": "^3.4.0"
   },
   "nodemonConfig": {
     "delay": 1500,
