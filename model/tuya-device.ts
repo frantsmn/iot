@@ -51,9 +51,7 @@ export default class TuyaDevice {
         });
         this.#device.on('error', async error => {
             log.error(`Ошибка с <${this.name}>: ${error}`);
-            // Если вдруг устройство после какой-нибудь ошибки не переподключится
-            // то вернуть эту строчку
-            // this.reconnect();
+            await this.reconnect();
         });
 
         this.connect().catch((error) => {
