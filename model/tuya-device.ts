@@ -66,6 +66,7 @@ export default class TuyaDevice {
             return true;
         } catch (error) {
             log.error(`Ошибка при подключении <${this.name}>`, error);
+            await this.#device.reconnect();
             return false;
         }
     }
