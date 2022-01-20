@@ -1,3 +1,6 @@
+import loggerCreator from "../logger"
+const log = loggerCreator('user-device');
+
 interface RawUserDevice {
     name: string
     mac_wifi: string
@@ -27,8 +30,7 @@ export default class UserDevice {
         if (this.#isConnected !== state) {
             this.#isConnected = state;
             this.#lastUpdate = Date.now();
-            // TODO Logger
-            console.log(`[${(new Date).toLocaleTimeString('ru-RU')}] Устройство "${this.name}" ${state ? 'в сети' : 'отключено'}`);
+            log.info(`${state ? '⬛' : '⬜'} <${this.name}> ${state ? 'в сети' : 'отключен от сети'}`);
         }
         // Обновляет время последней проверки
         this.#lastCheck = Date.now();

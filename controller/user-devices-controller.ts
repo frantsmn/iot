@@ -1,5 +1,7 @@
 import find from 'local-devices'
 import UserDevice from '../model/user-device'
+import loggerCreator from "../logger"
+const log = loggerCreator('user-devices-controller');
 
 export default class UserDevicesController {
     devices: Array<UserDevice>;
@@ -8,7 +10,7 @@ export default class UserDevicesController {
         this.devices = userDevices;
 
         if (process.platform !== "linux") {
-            console.log('Not a linux environment!')
+            log.warn('Not a linux environment!')
         }
     }
 
