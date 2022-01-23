@@ -11,11 +11,6 @@ import './scheduler'
 
 const app = express();
 const port = 3001;
-log.error({
-    test: 1,
-    message: 'error',
-
-})
 app.listen(port, () => log.info(`IoT started on port ${port}`));
 app.use(appLogger);
 app.use(express.json());
