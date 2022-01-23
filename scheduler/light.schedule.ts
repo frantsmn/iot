@@ -1,6 +1,9 @@
 import schedule from 'node-schedule'
 import {tuyaDeviceController} from "../controller";
 import {userDeviceController} from "../controller";
+import loggerCreator from "../logger"
+
+const log = loggerCreator('light-scheduler');
 
 export default class LightSchedule {
     constructor() {
@@ -8,7 +11,8 @@ export default class LightSchedule {
         schedule.scheduleJob(
             {hour: 7, minute: 55, dayOfWeek: [1, 2, 3, 4, 5]},
             async () => {
-                if (userDeviceController.isAnyDeviceConnected()) {
+                if (userDeviceController.isAnyDeviceConnected) {
+                    log.info('Включение <top> по расписанию');
                     await tuyaDeviceController.action('top', 'on');
                 }
             }
@@ -17,7 +21,8 @@ export default class LightSchedule {
         schedule.scheduleJob(
             {hour: 8, minute: 10, dayOfWeek: [1, 2, 3, 4, 5]},
             async () => {
-                if (userDeviceController.isAnyDeviceConnected()) {
+                if (userDeviceController.isAnyDeviceConnected) {
+                    log.info('Включение <ambient> по расписанию');
                     await tuyaDeviceController.action('ambient', 'on');
                 }
             }
@@ -27,7 +32,8 @@ export default class LightSchedule {
         schedule.scheduleJob(
             {hour: 9, minute: 30},
             async () => {
-                if (userDeviceController.isAnyDeviceConnected() === false) {
+                if (userDeviceController.isAnyDeviceConnected === false) {
+                    log.info('Выключение <all> по расписанию');
                     await tuyaDeviceController.action('all', 'off');
                 }
             }
@@ -35,7 +41,10 @@ export default class LightSchedule {
         // Выключать весь свет в 01:00
         schedule.scheduleJob(
             {hour: 1, minute: 0},
-            async () => await tuyaDeviceController.action('all', 'off')
+            async () => {
+                log.info('Выключение <all> по расписанию');
+                await tuyaDeviceController.action('all', 'off')
+            }
         );
     }
 }

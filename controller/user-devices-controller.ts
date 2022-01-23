@@ -1,7 +1,5 @@
 import find from 'local-devices'
 import UserDevice from '../model/user-device'
-import loggerCreator from "../logger"
-const log = loggerCreator('user-devices-controller');
 
 export default class UserDevicesController {
     devices: Array<UserDevice>;
@@ -10,7 +8,7 @@ export default class UserDevicesController {
         this.devices = userDevices;
 
         if (process.platform !== "linux") {
-            log.warn('Not a linux environment!')
+            console.warn('[user-device-controller] Not a linux environment!')
         }
     }
 
@@ -31,7 +29,7 @@ export default class UserDevicesController {
         return await Promise.all(devicePromises);
     }
 
-    isAnyDeviceConnected() {
+    get isAnyDeviceConnected() {
         return Boolean(this.devices.find(device => device.isConnected));
     }
 }

@@ -72,10 +72,6 @@ export default class TuyaDevice {
     }
 
     async disconnect(): Promise<boolean> {
-        if (!this.isConnected) {
-            log.silly(`Устройство <${this.name}> уже отключено`);
-            return true;
-        }
         try {
             await this.#device.disconnect();
             return true;
@@ -87,7 +83,7 @@ export default class TuyaDevice {
 
     async reconnect(): Promise<void> {
         if (this.#reconnection) {
-            log.silly(`Отмена повторного переподключения к <${this.name}>!`);
+            //log.silly(`Отмена повторного переподключения к <${this.name}>!`);
             return;
         }
         this.#reconnection = true;
