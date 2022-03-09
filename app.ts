@@ -6,8 +6,10 @@ import error from './router/error'
 
 import {log, appLogger} from './logger/app-logger'
 
-// Действия по расписаниям
+// Действия по расписаниям (поиск устройства пользователя)
 import './scheduler'
+// Конфигурация умного дома
+import './config'
 
 const app = express();
 const port = 3001;

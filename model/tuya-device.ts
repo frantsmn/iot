@@ -189,7 +189,7 @@ export default class TuyaDevice {
      * Установить RGB цвет свечения для устройства
      * @param {rgbColor} rgbColor
      */
-    async colorRGB({r, g, b}: rgbColor) {
+    async rgb({r, g, b}: rgbColor) {
         const hsvArr = rgbToHsv(r, g, b);
         await this.colorHSV({h: hsvArr[0], s: hsvArr[1], v: hsvArr[2]});
     }

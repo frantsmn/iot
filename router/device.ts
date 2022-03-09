@@ -20,7 +20,7 @@ device.post('/action/:device/dps', async (
 device.post('/action/:device/rgb', async (
     req,
     res) => {
-    await tuyaDeviceController.action(req.params.device, 'colorRGB', req.body);
+    await tuyaDeviceController.action(req.params.device, 'rgb', req.body);
     res.json(await tuyaDeviceController.status(req.params.device));
 });
 

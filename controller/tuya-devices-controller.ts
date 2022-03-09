@@ -1,6 +1,6 @@
 import TuyaDevice from "../model/tuya-device"
 
-type DeviceActionTypes = 'on' | 'off' | 'toggle' | 'dps' | string;
+type DeviceActionTypes = 'on' | 'off' | 'toggle' | 'dps' | 'rgb' | string;
 type DeviceNames = 'all' | string;
 
 export default class TuyaDevicesController {

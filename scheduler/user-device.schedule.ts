@@ -8,6 +8,7 @@ export default class UserDeviceSchedule {
             '0/30 * * * * *',
             () => userDeviceController.scanAll()
                 .catch((error) => {
+                    // todo затащить логгер
                     console.log('Ошибка при попытке поиска устройства пользователя');
                     console.error(error);
                 })
