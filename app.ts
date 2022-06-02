@@ -13,7 +13,7 @@ import './config'
 
 const app = express();
 const port = 3001;
-app.listen(port, () => log.info(`IoT started on port ${port}`));
+app.listen(port, () => log.info(`= iot service started =\nPort: ${port}`));
 app.use(appLogger);
 app.use(express.json());
 app.use(auth);
