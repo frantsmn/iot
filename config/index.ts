@@ -13,9 +13,9 @@ enum RuleMethods {
 }
 
 enum MobileDeviceStatus {
-    DISCONNECTED = 0,
-    CONNECTED = 1,
-    ANY = 2,
+    DISCONNECTED = 'disconnected',
+    CONNECTED = 'connected',
+    ANY = 'any',
 }
 
 interface RuleColor {
