@@ -2,6 +2,7 @@ import express from 'express'
 import auth from './router/auth'
 import device from './router/device'
 import logs from './router/logs'
+import test from './router/test'
 import error from './router/error'
 
 import {log, appLogger} from './logger/app-logger'
@@ -19,4 +20,5 @@ app.use(express.json());
 app.use(auth);
 app.use(device);
 app.use(logs);
+app.use(test);
 app.use(error);
