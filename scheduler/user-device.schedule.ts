@@ -11,6 +11,12 @@ export default class UserDeviceSchedule {
                     // todo затащить логгер
                     console.log('Ошибка при попытке поиска устройства пользователя');
                     console.error(error);
+                }).finally(() => {
+                    if (userDeviceController.isAnyDeviceConnected) {
+                        console.log('Устройство пользователя в сети');
+                    } else {
+                        console.log('Устройство пользователя не найдено');
+                    }
                 })
         );
     }
