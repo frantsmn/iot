@@ -3,21 +3,15 @@ import {userDeviceController} from "../controller";
 
 export default class UserDeviceSchedule {
     constructor() {
-        // Пытаться найти устройства пользователя каждые 30 секунд
-        schedule.scheduleJob(
-            '0/30 * * * * *',
-            () => userDeviceController.scanAll()
+        // Искать устройства пользователя каждые 30 секунд
+        schedule.scheduleJob('0/30 * * * * *', () => {
+            userDeviceController
+                .scanAll()
                 .catch((error) => {
                     // todo затащить логгер
-                    console.log('Ошибка при попытке поиска устройства пользователя');
+                    console.log('Ошибка при поиске устройства пользователя');
                     console.error(error);
-                }).finally(() => {
-                    if (userDeviceController.isAnyDeviceConnected) {
-                        console.log('Устройство пользователя в сети');
-                    } else {
-                        console.log('Устройство пользователя не найдено');
-                    }
                 })
-        );
+        });
     }
 }

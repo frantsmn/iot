@@ -48,10 +48,15 @@ const CONFIG_PATH = path.resolve(require('os').homedir(), '.iot/rules.json');
 class Config {
     rules: Array<Rule>
     jobs: Array<Object | void>
+    private readonly mobileDeviceStatusMap: { connected: boolean; disconnected: boolean };
 
     constructor() {
         this.rules = Array.from(require(CONFIG_PATH));
         this.jobs = this.rules.map((rule) => this.handleRule(rule));
+        this.mobileDeviceStatusMap = {
+            'disconnected': false,
+            'connected': true,
+        }
     }
 
     handleRule(rule: Rule) {
@@ -76,7 +81,7 @@ class Config {
     getJobFunc(rule: Rule) {
         return async () => {
             if (rule.mobileDeviceStatus !== MobileDeviceStatus.ANY) {
-                if (userDeviceController.isAnyDeviceConnected === Boolean(rule.mobileDeviceStatus)) {
+                if (userDeviceController.isAnyDeviceConnected === this.mobileDeviceStatusMap[rule.mobileDeviceStatus]) {
                     log.info(`${rule.action} <${rule.iotDevice}> по правилу`);
                     // todo человекопонятные логи
                     console.log(rule);
