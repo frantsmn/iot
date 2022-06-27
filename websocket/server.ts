@@ -19,7 +19,7 @@ wsServer.on('connection', (client) => {
     });
 });
 
-PythonShell.run(__dirname + '/sensor/sensor.py', null, function (err) {
+PythonShell.run('/home/pi/dev/iot/websocket/sensor/sensor.py', null, function (err) {
     if (err) throw err;
     console.error('[sensor.py] Finished with error:', err);
 });
