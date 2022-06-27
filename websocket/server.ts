@@ -1,16 +1,12 @@
 import WebSocketServer from 'ws'
-import {spawn} from "child_process";
+import {PythonShell} from 'python-shell';
 
 const wsServer = new WebSocketServer.Server({port: 9000});
-
 wsServer.on('connection', onConnect);
 
-// spawn new child process to call the python script
-const python = spawn('python', ['sensor/sensor.py'])
-
-// in close event we are sure that stream is from child process is closed
-python.on('close', (code) => {
-    console.log(`child process close all stdio with code ${code}`)
+PythonShell.run('sensor/sensor.py', null, function (err) {
+    if (err) throw err;
+    console.log('finished with error', err);
 });
 
 function onConnect(client) {
