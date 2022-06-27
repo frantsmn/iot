@@ -12,6 +12,8 @@ import './scheduler'
 // Конфигурация умного дома
 import './config'
 
+import './websocket/server';
+
 const app = express();
 const port = 3001;
 app.listen(port, () => log.info(`iot started on port ${port}`));
