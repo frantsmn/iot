@@ -2,14 +2,7 @@ import WebSocketServer from 'ws'
 import {PythonShell} from 'python-shell';
 
 const wsServer = new WebSocketServer.Server({port: 9000});
-wsServer.on('connection', onConnect);
-
-PythonShell.run('sensor/sensor.py', null, function (err) {
-    if (err) throw err;
-    console.log('finished with error', err);
-});
-
-function onConnect(client) {
+wsServer.on('connection', (client) => {
     console.log('New connection...', client);
 
     client.send('connected');
@@ -24,4 +17,9 @@ function onConnect(client) {
     client.on('close', function () {
         console.log('Connection closed!');
     });
-}
+});
+
+PythonShell.run('websocket/sensor/sensor.py', null, function (err) {
+    if (err) throw err;
+    console.error('[sensor.py] Finished with error:', err);
+});
