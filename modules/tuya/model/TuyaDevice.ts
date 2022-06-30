@@ -1,48 +1,36 @@
-import TuyAPI from 'tuyapi'
-import loggerCreator from '../logger/index'
-import rgbToHsv from 'rgb-hsv'
+import TuyAPI from 'tuyapi';
+import rgbToHsv from 'rgb-hsv';
+import loggerCreator from '../../logger';
+import type {HsvColor, RawTuyaDevice, RgbColor} from '../types';
 
 const log = loggerCreator('tuya-device');
 
-type rgbColor = {
-    r: number,
-    g: number,
-    b: number,
-}
-
-type hsvColor = {
-    h: number,
-    s: number,
-    v: number,
-}
-
-interface RawTuyaDevice {
-    type: 'bulb' | 'plug'
-    id: number
-    key: number
-    name: string
-}
-
 export default class TuyaDevice {
-    readonly type: 'bulb' | 'plug';             // Тип устройства
-    readonly id: any;                           // Уникальный идентификатор устройства
-    readonly name: any;                         // Наименование устройства
-    #device: any;                               // TuyAPI объект устройства
-    #status: boolean;                           // Статус устройства (вкл/выкл)
-    #reconnection: boolean;                     // Флаг текущего процесса переподключения устройства
+    // Тип устройства
+    readonly type: 'bulb' | 'plug';
+    // Уникальный идентификатор устройства
+    readonly id: any;
+    // Наименование устройства
+    readonly name: any;
+    // TuyAPI объект устройства
+    #device: any;
+    // Статус устройства (вкл/выкл)
+    #status: boolean;
+    // Флаг текущего процесса переподключения устройства
+    #reconnection: boolean;
 
     constructor({type, id, key, name}: RawTuyaDevice) {
-        this.type = type
-        this.id = id
-        this.name = name
-        this.#device = new TuyAPI({id, key, version: 3.3})
+        this.type = type;
+        this.id = id;
+        this.name = name;
+        this.#device = new TuyAPI({id, key, version: 3.3});
 
         this.#device.on('connected', () => log.info(`➕ <${this.name}> подключено`));
         this.#device.on('disconnected', async () => {
             log.warn(`❌ <${this.name}> отключено!`);
             await this.reconnect();
         });
-        this.#device.on('data', data => {
+        this.#device.on('data', (data) => {
             if (!data || !data.dps) return;
 
             switch (this.type) {
@@ -62,7 +50,7 @@ export default class TuyaDevice {
                     break;
             }
         });
-        this.#device.on('error', async error => {
+        this.#device.on('error', async (error) => {
             log.error(`Ошибка с <${this.name}>: ${error}`);
             await this.reconnect();
         });
@@ -70,6 +58,22 @@ export default class TuyaDevice {
         this.connect().catch((error) => {
             log.error(`Ошибка при создании TuyaDevice <${this.name}>`, error);
         });
+    }
+
+    /**
+     *  Текущее соединение с устройством
+     *  @returns {boolean}
+     */
+    get isConnected(): boolean {
+        return this.#device.isConnected();
+    }
+
+    get status() {
+        return this.#status;
+    }
+
+    set status(value: any) {
+        this.#status = Boolean(value);
     }
 
     async connect(): Promise<boolean> {
@@ -96,7 +100,7 @@ export default class TuyaDevice {
 
     async reconnect(): Promise<void> {
         if (this.#reconnection) {
-            //log.silly(`Отмена повторного переподключения к <${this.name}>!`);
+            // log.silly(`Отмена повторного переподключения к <${this.name}>!`);
             return;
         }
         this.#reconnection = true;
@@ -111,11 +115,11 @@ export default class TuyaDevice {
                 if (result) {
                     this.#reconnection = false;
                 } else {
-                    timeoutSec += Boolean(attemptCounter % 5) ? 0 : 5;
+                    timeoutSec += attemptCounter % 5 ? 0 : 5;
                     reconnectAttempt();
                 }
             }, timeoutSec * 1000);
-        }
+        };
         reconnectAttempt();
     }
 
@@ -181,27 +185,34 @@ export default class TuyaDevice {
     async dps(data) {
         await this.#device.set({
             multiple: true,
-            data
+            data,
         });
     }
 
     /**
-     * Установить RGB цвет свечения для устройства
-     * @param {rgbColor} rgbColor
+     * Получить текущую конфигурацию устройства
      */
-    async rgb({r, g, b}: rgbColor) {
+    async getDps() {
+        return await this.#device.get({schema: true});
+    }
+
+    /**
+     * Установить RGB цвет свечения для устройства
+     * @param {RgbColor} rgbColor
+     */
+    async rgb({r, g, b}: RgbColor) {
         const hsvArr = rgbToHsv(r, g, b);
         await this.colorHSV({h: hsvArr[0], s: hsvArr[1], v: hsvArr[2]});
     }
 
     /**
      * Установить HSV цвет свечения для устройства
-     * @param {hsvColor} hsvColor
+     * @param {HsvColor} hsvColor
      */
-    async colorHSV(hsvColor: hsvColor) {
+    async colorHSV(hsvColor: HsvColor) {
         await this.dps({
-            "21": "colour",
-            "24": `${this.convertHsvColorToTuyaHsvString(hsvColor)}`,
+            21: 'colour',
+            24: `${this.convertHsvColorToTuyaHsvString(hsvColor)}`,
         });
     }
 
@@ -211,9 +222,9 @@ export default class TuyaDevice {
      * @returns {string} tuyaHsvString
      */
     convertHsvColorToTuyaHsvString(hsvColor) {
-        const tuyaH = hsvColor['h'].toString(16).padStart(4, '0');
-        const tuyaS = (10 * hsvColor['s']).toString(16).padStart(4, '0');
-        const tuyaV = (10 * hsvColor['v']).toString(16).padStart(4, '0');
+        const tuyaH = hsvColor.h.toString(16).padStart(4, '0');
+        const tuyaS = (10 * hsvColor.s).toString(16).padStart(4, '0');
+        const tuyaV = (10 * hsvColor.v).toString(16).padStart(4, '0');
 
         return tuyaH + tuyaS + tuyaV;
     }
@@ -221,7 +232,7 @@ export default class TuyaDevice {
     /**
      * Запросить текущий статус устройства
      */
-    async fetchCurrentStatus(): Promise<boolean> {
+    async fetchCurrentStatus(): Promise<boolean | null> {
         try {
             switch (this.type) {
                 case 'bulb': {
@@ -230,25 +241,13 @@ export default class TuyaDevice {
                 case 'plug': {
                     return Boolean(await this.#device.get({dps: 1}));
                 }
+                default:
+                    return null;
             }
         } catch (error) {
             log.error(`Ошибка при получении статуса <${this.name}>`, error);
+
+            return null;
         }
-    }
-
-    /**
-     *  Текущее соединение с устройством
-     *  @returns {boolean}
-     */
-    get isConnected(): boolean {
-        return this.#device.isConnected();
-    }
-
-    set status(value: any) {
-        this.#status = Boolean(value);
-    }
-
-    get status() {
-        return this.#status;
     }
 }

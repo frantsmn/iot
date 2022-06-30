@@ -1,3 +1,1 @@
-export default function error(req, res) {
-    return res.status(404).json('404');
-}
+export default (req, res) => res.status(404).json('404');

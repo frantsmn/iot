@@ -1,4 +1,4 @@
-import TuyaDevice from "../model/tuya-device"
+import TuyaDevice from '../model/TuyaDevice';
 
 type DeviceActionTypes = 'on' | 'off' | 'toggle' | 'dps' | 'rgb' | string;
 type DeviceNames = 'all' | string;
@@ -17,9 +17,9 @@ export default class TuyaDevicesController {
     public async status(deviceName: 'all' | string) {
         switch (deviceName) {
             case 'all':
-                return await this.getAllDevicesStatuses();
+                return this.getAllDevicesStatuses();
             default:
-                return await this.getDeviceStatus(deviceName);
+                return this.getDeviceStatus(deviceName);
         }
     }
 
@@ -29,15 +29,18 @@ export default class TuyaDevicesController {
      * @param {'all' | string} actionType тип действия
      * @param {object} data данные из запроса
      */
-    public async action(deviceName: DeviceNames, actionType: DeviceActionTypes, data = {}): Promise<void> {
+    public async action(
+        deviceName: DeviceNames,
+        actionType: DeviceActionTypes,
+        data = {},
+    ): Promise<void> {
         switch (deviceName) {
             case 'all':
-                return await this.callActionForAllDevices(actionType, data);
+                return this.callActionForAllDevices(actionType, data);
             default:
-                return await this.callDeviceAction(deviceName, actionType, data);
+                return this.callDeviceAction(deviceName, actionType, data);
         }
     }
-
 
     /**
      * Метод получения статуса устройства
@@ -48,8 +51,19 @@ export default class TuyaDevicesController {
         const device = this.devices.find(({name}) => name === deviceName);
         return {
             connected: device.isConnected,
-            status: await device.fetchCurrentStatus()
-        }
+            status: await device.fetchCurrentStatus(),
+        };
+    }
+
+    /**
+     * Метод получения конфигурации устройства
+     * @param {string} deviceName имя устройства
+     * @private
+     */
+    public async getDeviceDps(deviceName: string) {
+        const device = this.devices.find(({name}) => name === deviceName);
+
+        return await device.getDps();
     }
 
     /**
@@ -84,7 +98,7 @@ export default class TuyaDevicesController {
      * @param {object} data данные из запроса
      */
     private async callActionForAllDevices(actionType: DeviceActionTypes, data) {
-        for (const device of this.devices) {
+        for await (const device of this.devices) {
             if (actionType in device) {
                 await device[actionType](data);
             }

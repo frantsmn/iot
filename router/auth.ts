@@ -1,7 +1,8 @@
-import {users} from '../model';
-import User from "../model/user";
+import users from '../modules/user/index';
+import User from '../modules/user/model/user';
 
-export default function auth(req, res, next) {
+// eslint-disable-next-line consistent-return
+export default (req, res, next): void => {
     // check for basic auth header
     if (!req.headers.authorization) {
         return res.status(401).json({message: 'Missing Authorization Header'});
@@ -20,4 +21,4 @@ export default function auth(req, res, next) {
     // req.user = user
 
     next();
-}
+};

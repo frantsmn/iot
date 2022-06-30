@@ -1,21 +1,16 @@
-import loggerCreator from "../logger"
+import loggerCreator from '../../logger';
+import type {RawUserDevice} from '../types';
+
 const log = loggerCreator('user-device');
 
-interface RawUserDevice {
-    name: string
-    mac_wifi: string
-    mac_bluetooth?: string
-    ip: string
-}
-
 export default class UserDevice {
-    readonly name: string
-    readonly ip: string
-    readonly macWifi: string
-    readonly macBluetooth?: string
-    #isConnected: boolean
-    #lastUpdate: number
-    #lastCheck: number
+    readonly name: string;
+    readonly ip: string;
+    readonly macWifi: string;
+    readonly macBluetooth?: string;
+    #isConnected: boolean;
+    #lastUpdate: number;
+    #lastCheck: number;
 
     constructor(device: RawUserDevice) {
         this.name = device.name;

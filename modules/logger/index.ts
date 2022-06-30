@@ -1,12 +1,22 @@
 import {createLogger, format, transports} from 'winston';
-import RuntimeTransport from './transport/RuntimeTransport'
-import LogHub from "./transport/LogHub";
+import RuntimeTransport from './transport/RuntimeTransport';
+import LogHub from './transport/LogHub';
 
-const {combine, timestamp, label, printf, errors, colorize, json} = format;
+const {
+    combine,
+    timestamp,
+    label,
+    printf,
+    errors,
+    colorize,
+} = format;
 const timeFormat = timestamp({format: 'DD.MM.YY HH:mm:ss'});
-const logFormat = printf(({level, message, label, timestamp}) =>
-    `${timestamp} [${label}] ${level}: ${message}`
-);
+const logFormat = printf(({
+    level,
+    message,
+    label,
+    timestamp,
+}) => `${timestamp} [${label}] ${level}: ${message}`);
 
 function createConsoleFormat(loggerName) {
     return combine(
@@ -35,7 +45,7 @@ export default (loggerName) => createLogger({
         new RuntimeTransport({
             level: 'silly',
             format: createRuntimeFormat(loggerName),
-            hub
+            hub,
         }),
-    ]
+    ],
 });

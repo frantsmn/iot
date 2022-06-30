@@ -3,13 +3,13 @@ interface LogHubOptions {
 }
 
 export default class LogHub {
-    history: Array<any>
-    length: number
-    private counter: number
+    history: Array<any>;
+    length: number;
+    private counter: number;
 
     constructor({length}: LogHubOptions) {
         this.length = length;
-        this.history = Array();
+        this.history = [];
         this.counter = 0;
     }
 
@@ -18,8 +18,12 @@ export default class LogHub {
             this.history = this.history.slice(1, this.length);
         }
 
-        info.hubId = this.counter;
-        this.counter++;
-        this.history.push(info);
+        const logItem = {
+            ...info,
+            hubId: this.counter,
+        };
+
+        this.counter += 1;
+        this.history.push(logItem);
     }
 }

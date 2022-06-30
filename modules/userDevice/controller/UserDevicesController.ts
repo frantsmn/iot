@@ -1,5 +1,5 @@
 import find from 'local-devices'
-import UserDevice from '../model/user-device'
+import UserDevice from '../model/UserDevice'
 
 export default class UserDevicesController {
     devices: Array<UserDevice>;
@@ -8,7 +8,7 @@ export default class UserDevicesController {
         this.devices = userDevices;
 
         if (process.platform !== "linux") {
-            console.warn('[user-device-controller] Not a linux environment!')
+            console.warn('[UserDeviceController] Not a linux platform!')
         }
     }
 
