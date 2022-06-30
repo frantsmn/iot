@@ -20,7 +20,7 @@ wsServer.on('connection', (client) => {
 if (process.platform !== "linux") {
     console.warn('[SensorHandler] Not a linux platform!')
 } else {
-    PythonShell.run('/home/pi/dev/iot/websocket/sensor/sensor.py', null, function (err) {
+    PythonShell.run('/home/pi/dev/iot/modules/sensor/python/sensor.py', null, function (err) {
         if (err) throw err;
         console.error('[sensor.py] Finished with error:', err);
     });
