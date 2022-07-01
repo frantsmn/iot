@@ -1,10 +1,19 @@
 import TuyAPI from 'tuyapi';
-import rgbToHsv from 'rgb-hsv';
 import loggerCreator from '../../logger';
-import type {HsvColor, RawTuyaDevice, RgbColor} from '../types';
+import sceneAdapter, {SceneConfig} from './adapters/scene';
+import colorAdapter, {RGBColor} from './adapters/color';
+
+export interface RawTuyaDevice {
+    type: 'bulb' | 'plug'
+    id: number
+    key: number
+    name: string
+}
 
 const log = loggerCreator('tuya-device');
 
+// todo Extend class from TuyAPI
+// todo Extend for each type => 'bulb' | 'plug'
 export default class TuyaDevice {
     // Тип устройства
     readonly type: 'bulb' | 'plug';
@@ -19,7 +28,12 @@ export default class TuyaDevice {
     // Флаг текущего процесса переподключения устройства
     #reconnection: boolean;
 
-    constructor({type, id, key, name}: RawTuyaDevice) {
+    constructor({
+        type,
+        id,
+        key,
+        name,
+    }: RawTuyaDevice) {
         this.type = type;
         this.id = id;
         this.name = name;
@@ -88,15 +102,15 @@ export default class TuyaDevice {
         }
     }
 
-    async disconnect(): Promise<boolean> {
-        try {
-            await this.#device.disconnect();
-            return true;
-        } catch (error) {
-            log.error(`Ошибка при отключении <${this.name}>`, error);
-            return false;
-        }
-    }
+    // async disconnect(): Promise<boolean> {
+    //     try {
+    //         await this.#device.disconnect();
+    //         return true;
+    //     } catch (error) {
+    //         log.error(`Ошибка при отключении <${this.name}>`, error);
+    //         return false;
+    //     }
+    // }
 
     async reconnect(): Promise<void> {
         if (this.#reconnection) {
@@ -179,7 +193,7 @@ export default class TuyaDevice {
     }
 
     /**
-     * Установить состояние для устройства
+     * Установить конфигурацию устройства
      * @param data
      */
     async dps(data) {
@@ -190,43 +204,26 @@ export default class TuyaDevice {
     }
 
     /**
-     * Получить текущую конфигурацию устройства
+     * Получить конфигурацию устройства
      */
     async getDps() {
-        return await this.#device.get({schema: true});
+        return this.#device.get({schema: true});
     }
 
     /**
      * Установить RGB цвет свечения для устройства
-     * @param {RgbColor} rgbColor
+     * @param {RGBColor} color
      */
-    async rgb({r, g, b}: RgbColor) {
-        const hsvArr = rgbToHsv(r, g, b);
-        await this.colorHSV({h: hsvArr[0], s: hsvArr[1], v: hsvArr[2]});
+    async rgb(color: RGBColor) {
+        await this.dps(colorAdapter(color));
     }
 
     /**
-     * Установить HSV цвет свечения для устройства
-     * @param {HsvColor} hsvColor
+     * Установить сцену (плавная смена цвета)
+     * @param {SceneConfig} data
      */
-    async colorHSV(hsvColor: HsvColor) {
-        await this.dps({
-            21: 'colour',
-            24: `${this.convertHsvColorToTuyaHsvString(hsvColor)}`,
-        });
-    }
-
-    /**
-     * Конвертировать цвет свечения из hsvColor в строку
-     * @param {hsvColor} hsvColor
-     * @returns {string} tuyaHsvString
-     */
-    convertHsvColorToTuyaHsvString(hsvColor) {
-        const tuyaH = hsvColor.h.toString(16).padStart(4, '0');
-        const tuyaS = (10 * hsvColor.s).toString(16).padStart(4, '0');
-        const tuyaV = (10 * hsvColor.v).toString(16).padStart(4, '0');
-
-        return tuyaH + tuyaS + tuyaV;
+    async scene(data: SceneConfig) {
+        await this.dps(sceneAdapter(data));
     }
 
     /**

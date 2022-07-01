@@ -50,6 +50,7 @@ export default class TuyaDevicesController {
     private async getDeviceStatus(deviceName: string) {
         const device = this.devices.find(({name}) => name === deviceName);
         return {
+            ...await this.getDeviceDps(deviceName),
             connected: device.isConnected,
             status: await device.fetchCurrentStatus(),
         };
@@ -63,7 +64,7 @@ export default class TuyaDevicesController {
     public async getDeviceDps(deviceName: string) {
         const device = this.devices.find(({name}) => name === deviceName);
 
-        return await device.getDps();
+        return device.getDps();
     }
 
     /**
