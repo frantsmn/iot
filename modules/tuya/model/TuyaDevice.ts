@@ -197,6 +197,43 @@ export default class TuyaDevice {
      * @param data
      */
     async dps(data) {
+        if (data['21'] === 'scene') {
+            await this.#device.set({
+                multiple: true,
+                data: {
+                    21: 'scene',
+                    25: data[25],
+                },
+            });
+
+            return;
+        }
+
+        if (data['21'] === 'colour') {
+            await this.#device.set({
+                multiple: true,
+                data: {
+                    21: 'colour',
+                    24: data[24],
+                },
+            });
+
+            return;
+        }
+
+        if (data['21'] === 'white') {
+            await this.#device.set({
+                multiple: true,
+                data: {
+                    21: 'white',
+                    22: data[22],
+                    23: data[23],
+                },
+            });
+
+            return;
+        }
+
         await this.#device.set({
             multiple: true,
             data,

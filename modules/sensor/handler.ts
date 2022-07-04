@@ -1,24 +1,21 @@
-import throttle from 'lodash.throttle'
-import tuyaDeviceController from "../tuya";
-
-const throttledHandleMessage = throttle((rawMessage, callback) => callback(rawMessage), 3000, {'trailing': false});
+import throttle from 'lodash.throttle';
+import tuyaDeviceController from '../tuya';
 
 let timeout: NodeJS.Timeout = null;
 let dps: any = null;
 
 async function handleMessage(rawMessage) {
-    const message = rawMessage.toString('utf8');
-    const timestamp = parseInt(String(parseFloat(message) * 1000));
-    console.log('[handle message]', timestamp);
+    const message = rawMessage.toString();
+    const timestamp = parseInt(String(parseFloat(message) * 1000), 10);
 
     // Читать текущий конфиг лампочки
     dps = !dps ? await tuyaDeviceController.getDeviceDps('top') : dps;
-    console.log('[dps top] >', dps?.dps);
+    console.log('[Сохранение конфигурации]', timestamp, dps?.dps);
 
-    await tuyaDeviceController.action('top', 'dps', {
-        "21": "white",
-        "22": 500,
-        "23": 0
+    await tuyaDeviceController.action('top', 'rgb', {
+        r: 255,
+        g: 255,
+        b: 255,
     });
 
     if (timeout) {
@@ -27,13 +24,11 @@ async function handleMessage(rawMessage) {
 
     timeout = setTimeout(() => {
         if (dps) {
-            console.log('[Попытка вернуть конфиг]', dps.dps);
+            console.log('[Возврат пред. конфигурации]', dps.dps);
             tuyaDeviceController.action('top', 'dps', dps.dps);
             dps = null;
         }
-    }, 6000);
+    }, 10000);
 }
 
-export default function onMessage(rawMessage) {
-    throttledHandleMessage(rawMessage, handleMessage);
-}
+export default throttle(handleMessage, 3000, {trailing: false});
