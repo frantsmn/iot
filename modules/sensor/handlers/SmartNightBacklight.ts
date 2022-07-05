@@ -22,6 +22,8 @@ export default class SmartNightBacklight {
         this.dps = !this.dps ? await tuyaDeviceController.getDeviceDps('top') : this.dps;
         // Валидация конфига
         if (!this.dps || !this.dps?.dps || this.dps.dps[21] === 'white') {
+            this.dps = null;
+
             return;
         }
 
@@ -49,6 +51,8 @@ export default class SmartNightBacklight {
             } else {
                 console.log('[SmartNightBacklight] > Возврат конфигурации отменен. Режим был изменен');
             }
+
+            this.dps = null;
         }, 30000);
     }
 }
