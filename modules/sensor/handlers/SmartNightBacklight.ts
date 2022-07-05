@@ -21,7 +21,7 @@ export default class SmartNightBacklight {
         // Читать текущий конфиг лампочки
         this.dps = !this.dps ? await tuyaDeviceController.getDeviceDps('top') : this.dps;
         // Валидация конфига
-        if (!this.dps || !this.dps?.dps || this.dps.dps[21] !== 'colour') {
+        if (!this.dps || !this.dps?.dps || this.dps.dps[21] === 'white') {
             return;
         }
 
