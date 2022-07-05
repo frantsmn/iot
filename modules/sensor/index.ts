@@ -1,27 +1,10 @@
-import WebSocketServer from 'ws';
-import {PythonShell} from 'python-shell';
-import onMessage from './handler';
+import PIRSensor from './PIRSensor';
+import SmartNightBacklight from './handlers/SmartNightBacklight';
 
-const wsServer = new WebSocketServer.Server({port: 9000});
-wsServer.on('connection', (client) => {
-    console.log('New connection...');
-
-    client.send('connected');
-
-    client.on('message', (message) => {
-        onMessage(message);
-    });
-
-    client.on('close', () => {
-        console.log('Connection closed!');
-    });
+const pirSensor = new PIRSensor({
+    port: 9000,
+    throttleTimeout: 3000,
 });
 
-if (process.platform !== 'linux') {
-    console.warn('[SensorHandler] Not a linux platform!');
-} else {
-    PythonShell.run('/home/pi/dev/iot/modules/sensor/python/sensor.py', null, (err) => {
-        if (err) throw err;
-        console.error('[sensor.py] Finished with error:', err);
-    });
-}
+// eslint-disable-next-line import/prefer-default-export
+export const smartNightBacklight = new SmartNightBacklight(pirSensor);
