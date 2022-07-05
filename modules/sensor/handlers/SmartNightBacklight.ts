@@ -38,12 +38,16 @@ export default class SmartNightBacklight {
             clearTimeout(this.timeout);
         }
 
-        this.timeout = setTimeout(() => {
-            if (this.dps) {
-                console.log('[SmartNightBacklight] > Возврат пред. конфигурации', this.dps.dps);
+        this.timeout = setTimeout(async () => {
+            const currentDps = await tuyaDeviceController.getDeviceDps('top');
+
+            // Если по прежнему стоит цвет умной подсветки (не сменили режим)
+            if (this.dps && currentDps?.dps[21] === 'colour' && currentDps?.dps[24] === '0000000003e8') {
+                console.log('[SmartNightBacklight] > Возврат конфигурации', this.dps.dps);
 
                 tuyaDeviceController.action('top', 'dps', this.dps.dps);
-                this.dps = null;
+            } else {
+                console.log('[SmartNightBacklight] > Возврат конфигурации отменен. Режим был изменен');
             }
         }, 30000);
     }
