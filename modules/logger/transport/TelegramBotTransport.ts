@@ -29,7 +29,7 @@ export default class TelegramBotTransport extends WinstonTransport {
         this.label = opts.label;
     }
 
-    log(logItem: LogItem) {
+    log(logItem: LogItem, callback) {
         const postData = JSON.stringify({
             ...logItem,
             label: this.label,
@@ -46,5 +46,6 @@ export default class TelegramBotTransport extends WinstonTransport {
         });
         req.write(postData);
         req.end();
+        callback();
     }
 }
