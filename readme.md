@@ -2,4 +2,4 @@
 
 `:3001` iot server
 
-`:3002` ws server (pir sensor)
+`:9000` ws server (pir sensor)

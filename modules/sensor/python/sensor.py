@@ -4,7 +4,7 @@ from gpiozero import MotionSensor
 
 # websocket.enableTrace(True)
 ws = websocket.WebSocket()
-ws.connect("ws://localhost:3002", timeout=5, origin="sensor")
+ws.connect("ws://localhost:9000", timeout=5, origin="sensor")
 # ws.send("Sensor connected")
 # print('Message from server > ', ws.recv())
 # ws.close()
