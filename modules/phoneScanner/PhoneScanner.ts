@@ -9,12 +9,7 @@ export default class PhoneScanner {
         schedule.scheduleJob('0/30 * * * * *', () => {
             userDeviceController
                 .scanAll()
-                .catch((error) => {
-                    log.error({
-                        message: `Ошибка при сканировании: ${error}`,
-                        isTgSilent: true,
-                    });
-                });
+                .catch((error) => log.error(`Ошибка при сканировании: ${error}`));
         });
     }
 }

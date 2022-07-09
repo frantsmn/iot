@@ -65,19 +65,11 @@ export default class TuyaDevice {
             }
         });
         this.#device.on('error', async (error) => {
-            log.error({
-                message: `Ошибка с <${this.name}>: ${error}`,
-                isTgSilent: true,
-            });
+            log.error(`Ошибка с <${this.name}>: ${error}`);
             await this.reconnect();
         });
 
-        this.connect().catch((error) => {
-            log.error({
-                message: `Ошибка при создании TuyaDevice <${this.name}>: ${error}`,
-                isTgSilent: true,
-            });
-        });
+        this.connect().catch((error) => log.error(`Ошибка при создании TuyaDevice <${this.name}>: ${error}`));
     }
 
     /**
@@ -102,10 +94,7 @@ export default class TuyaDevice {
             await this.#device.connect();
             return true;
         } catch (error) {
-            log.error({
-                message: `Ошибка при подключении <${this.name}>: ${error}`,
-                isTgSilent: true,
-            });
+            log.error(`Ошибка при подключении <${this.name}>: ${error}`);
             await this.reconnect();
             return false;
         }
@@ -116,10 +105,7 @@ export default class TuyaDevice {
     //         await this.#device.disconnect();
     //         return true;
     //     } catch (error) {
-    //         log.error({
-    //              message: `Ошибка при отключении <${this.name}>: ${error}`,
-    //              isTgSilent: true,
-    //         });
+    //         log.error(`Ошибка при отключении <${this.name}>: ${error}`);
     //         return false;
     //     }
     // }
@@ -164,10 +150,7 @@ export default class TuyaDevice {
                     break;
             }
         } catch (error) {
-            log.error({
-                message: `Ошибка при переключении состояния <${this.name}>: ${error}`,
-                isTgSilent: true,
-            });
+            log.error(`Ошибка при переключении состояния <${this.name}>: ${error}`);
         }
     }
 
@@ -188,10 +171,7 @@ export default class TuyaDevice {
                     break;
             }
         } catch (error) {
-            log.error({
-                message: `Ошибка при включении <${this.name}>: ${error}`,
-                isTgSilent: true,
-            });
+            log.error(`Ошибка при включении <${this.name}>: ${error}`);
         }
     }
 
@@ -212,10 +192,7 @@ export default class TuyaDevice {
                     break;
             }
         } catch (error) {
-            log.error({
-                message: `Ошибка при выключении <${this.name}>: ${error}`,
-                isTgSilent: true,
-            });
+            log.error(`Ошибка при выключении <${this.name}>: ${error}`);
         }
     }
 
@@ -308,7 +285,7 @@ export default class TuyaDevice {
         } catch (error) {
             log.error({
                 message: `Ошибка при получении статуса <${this.name}>: ${error}`,
-                isTgSilent: true,
+                isTgSilent: false,
             });
 
             return null;
