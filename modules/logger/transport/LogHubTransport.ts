@@ -1,8 +1,8 @@
 import Transport from 'winston-transport';
-import LogHub from "./LogHub";
+import LogHub from '../../logHub/LogHub';
 
-export default class RuntimeTransport extends Transport {
-    hub: LogHub
+export default class LogHubTransport extends Transport {
+    hub: LogHub;
 
     constructor(opts) {
         super(opts);
@@ -10,7 +10,7 @@ export default class RuntimeTransport extends Transport {
     }
 
     log(info, callback) {
-        this.hub.addLog(info)
+        this.hub.addLog(info);
         callback();
     }
 }

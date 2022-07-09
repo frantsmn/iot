@@ -1,5 +1,5 @@
-import find from 'local-devices'
-import UserDevice from '../model/UserDevice'
+import find from 'local-devices';
+import UserDevice from '../model/UserDevice';
 
 export default class UserDevicesController {
     devices: Array<UserDevice>;
@@ -7,13 +7,14 @@ export default class UserDevicesController {
     constructor(userDevices: Array<UserDevice>) {
         this.devices = userDevices;
 
-        if (process.platform !== "linux") {
-            console.warn('[UserDeviceController] Not a linux platform!')
+        if (process.platform !== 'linux') {
+            console.warn('[UserDeviceController] Not a linux platform!');
         }
     }
 
+    // eslint-disable-next-line class-methods-use-this
     async scanDevice(device: UserDevice) {
-        if (process.platform !== "linux") return;
+        if (process.platform !== 'linux') return;
 
         const result: any = await find(device.ip);
 
@@ -26,10 +27,10 @@ export default class UserDevicesController {
 
     async scanAll() {
         const devicePromises = this.devices.map((device) => this.scanDevice(device));
-        return await Promise.all(devicePromises);
+        return Promise.all(devicePromises);
     }
 
     get isAnyDeviceConnected() {
-        return Boolean(this.devices.find(device => device.isConnected));
+        return Boolean(this.devices.find((device) => device.isConnected));
     }
 }

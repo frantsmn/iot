@@ -2,7 +2,7 @@ import PIRSensor from './PIRSensor';
 import SmartNightBacklight from './handlers/SmartNightBacklight';
 
 const pirSensor = new PIRSensor({
-    port: 9000,
+    port: 3002,
     throttleTimeout: 3000,
 });
 

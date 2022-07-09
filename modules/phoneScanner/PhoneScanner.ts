@@ -1,4 +1,7 @@
 import schedule from 'node-schedule';
+import loggerCreator from '../logger';
+
+const log = loggerCreator('PhoneScanner');
 
 export default class PhoneScanner {
     constructor(userDeviceController) {
@@ -7,9 +10,10 @@ export default class PhoneScanner {
             userDeviceController
                 .scanAll()
                 .catch((error) => {
-                    // todo затащить логгер
-                    console.log('Ошибка при поиске устройства пользователя');
-                    console.error(error);
+                    log.error({
+                        message: `Ошибка при сканировании: ${error}`,
+                        isTgSilent: true,
+                    });
                 });
         });
     }

@@ -1,6 +1,7 @@
 import {createLogger, format, transports} from 'winston';
-import RuntimeTransport from './transport/RuntimeTransport';
-import LogHub from './transport/LogHub';
+import TelegramBotTransport from './transport/TelegramBotTransport';
+// import logHub from '../logHub';
+// import LogHubTransport from './transport/LogHubTransport';
 
 const {
     combine,
@@ -28,24 +29,30 @@ function createConsoleFormat(loggerName) {
     );
 }
 
-function createRuntimeFormat(loggerName) {
-    return combine(
-        label({label: loggerName}),
-        timestamp(),
-    );
-}
+// function createLogHubFormat(loggerName) {
+//     return combine(
+//         label({label: loggerName}),
+//         timestamp(),
+//     );
+// }
 
-export const hub = new LogHub({length: 100});
-export default (loggerName) => createLogger({
+const loggerCreator = (loggerName) => createLogger({
     transports: [
         new transports.Console({
             level: 'silly',
             format: createConsoleFormat(loggerName),
         }),
-        new RuntimeTransport({
+        new TelegramBotTransport({
+            format: format.json(),
             level: 'silly',
-            format: createRuntimeFormat(loggerName),
-            hub,
+            label: loggerName,
         }),
+        // new LogHubTransport({
+        //     level: 'silly',
+        //     format: createLogHubFormat(loggerName),
+        //     hub: logHub,
+        // }),
     ],
 });
+
+export default loggerCreator;

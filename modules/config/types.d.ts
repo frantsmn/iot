@@ -25,6 +25,7 @@ export interface RuleSchedule {
 }
 
 export interface Rule {
+    title: string,
     method: RuleMethods,
     action: RuleAction,
     iotDevice: string,

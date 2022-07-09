@@ -27,6 +27,7 @@ class Config {
     private readonly mobileDeviceStatusMap: { connected: boolean; disconnected: boolean };
 
     constructor() {
+        // eslint-disable-next-line global-require, import/no-dynamic-require
         this.rules = Array.from(require(CONFIG_PATH));
         this.jobs = this.rules.map((rule) => this.handleRule(rule));
         this.mobileDeviceStatusMap = {
@@ -37,11 +38,15 @@ class Config {
 
     handleRule(rule: Rule) {
         switch (rule.method) {
-            case RuleMethods.CRON:
+            case RuleMethods.CRON: {
                 this.createCronJob(rule);
                 break;
-            case RuleMethods.SCHEDULE:
+            }
+            case RuleMethods.SCHEDULE: {
                 this.createScheduleJob(rule);
+                break;
+            }
+            default:
                 break;
         }
     }
@@ -55,23 +60,40 @@ class Config {
         return schedule.scheduleJob(rule.schedule, this.getJobFunc(rule));
     }
 
-    getJobFunc(rule: Rule) {
+    // eslint-disable-next-line class-methods-use-this
+    getJobFunc({
+        title,
+        mobileDeviceStatus,
+        iotDevice,
+        action,
+        data,
+    }: Rule): () => Promise<void> {
         return async () => {
-            if (rule.mobileDeviceStatus !== MobileDeviceStatus.ANY) {
-                if (userDevicesController.isAnyDeviceConnected === this.mobileDeviceStatusMap[rule.mobileDeviceStatus]) {
-                    log.info(`${rule.action} <${rule.iotDevice}> по правилу`);
-                    // todo человекопонятные логи
-                    console.log(rule);
-                    await tuyaDeviceController.action(rule.iotDevice, rule.action, rule.data);
+            switch (mobileDeviceStatus) {
+                case MobileDeviceStatus.CONNECTED: {
+                    if (userDevicesController.isAnyDeviceConnected) {
+                        await tuyaDeviceController.action(iotDevice, action, data);
+                        log.info(title);
+                    }
+                    break;
                 }
-            } else {
-                log.info(`${rule.action} <${rule.iotDevice}> по правилу`);
-                // todo человекопонятные логи
-                console.log(rule);
-                await tuyaDeviceController.action(rule.iotDevice, rule.action, rule.data);
+                case MobileDeviceStatus.DISCONNECTED: {
+                    if (!userDevicesController.isAnyDeviceConnected) {
+                        await tuyaDeviceController.action(iotDevice, action, data);
+                        log.info(title);
+                    }
+                    break;
+                }
+                default: {
+                    await tuyaDeviceController.action(iotDevice, action, data);
+                    log.info(title);
+                    break;
+                }
             }
         };
     }
 }
 
-new Config();
+const config = new Config();
+
+export default config;

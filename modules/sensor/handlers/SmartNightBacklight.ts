@@ -1,5 +1,8 @@
 import tuyaDeviceController from '../../tuya';
 import type PIRSensor from '../PIRSensor';
+import loggerCreator from '../../logger';
+
+const log = loggerCreator('SmartNightBacklight');
 
 /**
  * SmartNightBacklight (Умная ночная подсветка)
@@ -11,13 +14,13 @@ export default class SmartNightBacklight {
     private dps: any;
 
     constructor(pirSensor: PIRSensor) {
-        pirSensor.on('connect', () => console.log('[SmartNightBacklight] > Подключен'));
+        pirSensor.on('connect', () => log.info('Сенсор подключен'));
         pirSensor.on('message', this.handleMessage);
         this.timeout = null;
         this.dps = null;
     }
 
-    async handleMessage({message}) {
+    async handleMessage(/* {message} */) {
         // Читать текущий конфиг лампочки
         this.dps = !this.dps ? await tuyaDeviceController.getDeviceDps('top') : this.dps;
         // Валидация конфига
@@ -27,8 +30,8 @@ export default class SmartNightBacklight {
             return;
         }
 
-        const timestamp = parseInt(String(parseFloat(message) * 1000), 10);
-        console.log('[SmartNightBacklight] > Сохранение конфигурации', timestamp, this.dps?.dps);
+        // const timestamp = parseInt(String(parseFloat(message) * 1000), 10);
+        log.info('Сохранение конфигурации');
 
         await tuyaDeviceController.action('top', 'rgb', {
             r: 255,
@@ -45,11 +48,11 @@ export default class SmartNightBacklight {
 
             // Если по прежнему стоит цвет умной подсветки (не сменили режим)
             if (this.dps && currentDps?.dps[21] === 'colour' && currentDps?.dps[24] === '0000000003e8') {
-                console.log('[SmartNightBacklight] > Возврат конфигурации', this.dps.dps);
+                await tuyaDeviceController.action('top', 'dps', this.dps.dps);
 
-                tuyaDeviceController.action('top', 'dps', this.dps.dps);
+                log.info('Возврат конфигурации');
             } else {
-                console.log('[SmartNightBacklight] > Возврат конфигурации отменен. Режим был изменен');
+                log.info('Возврат конфигурации отменен');
             }
 
             this.dps = null;
