@@ -1,11 +1,11 @@
 import {Router} from 'express';
-import {hub} from '../modules/logger';
+import logHub from '../modules/logHub';
 
 const router = Router();
 
 router.get('/logs', async (
     req,
     res,
-) => res.json(hub.history));
+) => res.json(logHub.history));
 
 export default router;
