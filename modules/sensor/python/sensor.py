@@ -1,5 +1,5 @@
 import websocket
-from datetime import datetime
+# from datetime import datetime
 from gpiozero import MotionSensor
 
 # websocket.enableTrace(True)
@@ -13,5 +13,8 @@ pir = MotionSensor(4)
 
 while True:
     pir.wait_for_motion()
-    timestamp = str(datetime.timestamp(datetime.now()))
-    ws.send(timestamp)
+    # dt = datetime.now()
+    # ts = datetime.timestamp(dt)
+    # timestamp = str(datetime.timestamp(datetime.now()))
+    # print('Motion', timestamp)
+    ws.send('1')

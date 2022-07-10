@@ -6,7 +6,7 @@ const log = loggerCreator('SmartNightBacklight');
 
 /**
  * SmartNightBacklight (Умная ночная подсветка)
- * Делает ночное освещение ярче при обнаружении движения в комнате
+ * Делает ночное освещение ярче если обнаружено движение
  */
 
 export default class SmartNightBacklight {
@@ -14,8 +14,11 @@ export default class SmartNightBacklight {
     private dps: any;
 
     constructor(pirSensor: PIRSensor) {
-        pirSensor.on('connect', () => log.info('Сенсор подключен'));
-        pirSensor.on('message', this.handleMessage);
+        pirSensor.on('connect', () => log.info('Подключено к PIR Sensor'));
+        pirSensor.on('message', this.handleMessage, {
+            throttleTimeout: 3000,
+            trailing: false,
+        });
         this.timeout = null;
         this.dps = null;
     }

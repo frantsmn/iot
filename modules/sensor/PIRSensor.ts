@@ -1,21 +1,16 @@
-import {Server} from 'ws';
-import {PythonShell} from 'python-shell';
-import {EventEmitter} from 'events';
+import { Server } from 'ws';
+import { PythonShell } from 'python-shell';
+import { EventEmitter } from 'events';
 import throttle from 'lodash.throttle';
 
 export default class PIRSensor {
     private eventEmitter: EventEmitter;
     private wsServer: Server;
-    private readonly throttledMessageEmitter: throttle;
     #isConnected = false;
 
-    constructor({port, throttleTimeout}: { port: number, throttleTimeout: number }) {
-        this.wsServer = new Server({port});
+    constructor({ port }: { port: number }) {
+        this.wsServer = new Server({ port });
         this.eventEmitter = new EventEmitter();
-        this.throttledMessageEmitter = throttle((message) => this.eventEmitter.emit('message', {
-            timestamp: Date.now(),
-            message: message.toString(),
-        }), throttleTimeout, {trailing: false});
 
         this.wsServer.on('connection', (client) => {
             this.#isConnected = true;
@@ -24,7 +19,9 @@ export default class PIRSensor {
                 timestamp: Date.now(),
             });
 
-            client.on('message', (message) => this.throttledMessageEmitter(message));
+            client.on('message', () => {
+                this.eventEmitter.emit('message');
+            });
 
             client.on('close', () => {
                 this.#isConnected = false;
@@ -58,8 +55,29 @@ export default class PIRSensor {
      * @param eventName
      * @param handler
      */
-    on(eventName: 'connect' | 'message' | 'close', handler: (...args: any[]) => void) {
-        this.eventEmitter.on(eventName, handler);
+    on(
+        eventName: 'connect' | 'message' | 'close',
+        handler: (...args: any[]) => void,
+        options?: {
+            throttleTimeout: number,
+            trailing: Boolean,
+        },
+    ) {
+        if (eventName === 'message') {
+            const throttledHandler = throttle(
+                handler,
+                options.throttleTimeout ?? 5000,
+                { trailing: options.trailing ?? false }
+            );
+
+            this.eventEmitter.on(eventName, throttledHandler);
+
+            return throttledHandler;
+        } else {
+            this.eventEmitter.on(eventName, handler);
+
+            return handler;
+        }
     }
 
     /**
