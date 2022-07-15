@@ -30,6 +30,10 @@ export default class UserDevicesController {
         return Promise.all(devicePromises);
     }
 
+    setState(deviceName, state) {
+        this.devices.find(device => (device.name === deviceName)).setState(state);
+    }
+
     get isAnyDeviceConnected() {
         return Boolean(this.devices.find((device) => device.isConnected));
     }

@@ -27,6 +27,7 @@ export default class SurveillanceCamera {
         log.info({
             message: 'Старт съемки...',
             isTg: true,
+            isTgSilent: false,
         });
 
         Camera.photoTimelapse();

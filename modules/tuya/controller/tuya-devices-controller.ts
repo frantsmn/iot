@@ -25,14 +25,14 @@ export default class TuyaDevicesController {
 
     /**
      * Выполнить действие
-     * @param {string} deviceName имя устройства
-     * @param {'all' | string} actionType тип действия
+     * @param {DeviceNames} deviceName имя устройства
+     * @param {DeviceActionTypes} actionType тип действия
      * @param {object} data данные из запроса
      */
     public async action(
         deviceName: DeviceNames,
         actionType: DeviceActionTypes,
-        data = {},
+        data? : Object,
     ): Promise<void> {
         switch (deviceName) {
             case 'all':
